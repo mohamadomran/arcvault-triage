@@ -70,13 +70,13 @@ I made four changes, and kept each only if nothing that had passed before then f
 
 On the prompt as of change 3, gpt-4o passed 14 of 15 at $0.0054 per message, against gpt-4o-mini's 12 of 15 at $0.0003. With change 4, gpt-4o-mini reaches 14 of 15 at a seventeenth of the cost. I didn't rerun gpt-4o on the final prompt.
 
-**Priority.** Against my expectations, the end-to-end test first passed 2 of the 5 samples, with samples 2, 3 and 4 off on priority only. I then replaced the prompt's priority rules with my policy (see `DECISIONS.md`): 3 of 5. Sample 3 (an invoice above the contract rate) is still Medium where I expect High, and sample 4 (an SSO evaluation question) is still Low where I expect Medium. The model's priority tracks its urgency reading. No category, queue or reason changed on any of the 15 messages.
+**Priority.** Against my expectations, the end-to-end test first passed 2 of the 5 samples, with samples 2, 3 and 4 off on priority only. I then replaced the prompt's priority rules with my policy (see `DECISIONS.md`): 3 of 5. Sample 3 (an invoice above the contract rate) is still Medium where I expect High, and sample 4 (an SSO evaluation question) is still Low where I expect Medium. It isn't urgency: in the final run sample 3's urgency is Low and its priority Medium. A demo invoice with a $1,100 gap came back High, so the model may weigh the size of the gap, but two cases don't show that. No category, queue or reason changed on any of the 15 messages.
 
 ## Known weaknesses
 
 - **Both safety nets are the model's own judgment.** Confidence is self-reported, and so is `actionable`.
 - **The outage boundary still leaks** (x08), which costs an unneeded escalation.
-- **Priority misses my policy on samples 3 and 4.** The model follows urgency instead.
+- **Priority misses my policy on samples 3 and 4,** and I don't know why.
 - **The tests are small and mine.** The rules were written knowing the samples.
 - **There is one category per message.** x07's billing question isn't routed.
 - **Record assembly isn't unit-tested.** It lives in a Code node template in `build-workflow.js`.
