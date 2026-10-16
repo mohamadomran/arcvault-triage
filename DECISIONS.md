@@ -24,3 +24,16 @@ Decisions I have approved, and why. Newest at the bottom.
 - **Tests compare files, not webhook.site.** The end-to-end test compares `output/records/*.json` with `tests/expected.json`. webhook.site is only for the demo, so the tests don't depend on an outside service.
 - **Extra samples are kept separate.** Ambiguous messages that exercise the low-confidence path live in `samples-extra.json`. `tests/expected.json` holds only my expected outcomes for the five spec samples.
 - **One-command setup.** The OpenAI credential is loaded with `n8n import:credentials`. The generated credentials file is gitignored because it contains the API key.
+
+## Stage 2: routing
+
+- **The keyword check runs even when the LLM call failed.** It reads only the raw message, so a failed call on a message that says "outage" carries both `outage_keyword` and `llm_error`, and the reviewer can see it may be urgent.
+- **The billing rule applies to any category.** If the model extracts both amounts, a discrepancy over $500 escalates whatever the category. I ignore currency and assume USD, as the prompt does.
+- **The discrepancy is computed in whole cents.** In floating point, 600.20 − 100.20 is 500.00000000000006, which would fire the "over $500" rule on an exact $500 discrepancy.
+- **Unusable LLM output counts as a failed call.** A category outside the map, or a confidence that isn't a number from 0 to 1, gives `llm_error` and a null `standard_queue` instead of an exception, so the record is escalated, not dropped. Strict structured outputs should make this impossible, and the guard is cheap.
+- **Escalation reasons follow the schema's order.** Every rule that fires is listed. Comparisons with `tests/expected.json` treat the reasons as a set.
+- **Outage keywords.** Matched case-insensitively, as whole words, on the raw message:
+  - `outage`, `outages`: the spec's own example and the most direct word. Risks false positives on past or planned outages ("credit for last week's outage").
+  - `down`, only after `is`, `are`, `was`, `were`, `went` or `been`, after `'s` or `’s` ("it’s down"), or in `down for` (the spec's "down for all users"): the most common way customers report an outage. Requiring these forms avoids "drop-down", "scroll down" and "download". Risks "usage is down" and "the price went down".
+  - I left out "stopped loading" and "multiple users" because they come from sample 5, which the multi-user flag and the Incident/Outage category already cover. I left out "all users", "everyone" and "unavailable" because they are common in how-to and feature questions.
+  - There is no negation handling, so "no outage on our end" still escalates. A false positive costs one human review, while a missed outage sits in a normal queue.
