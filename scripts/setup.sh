@@ -10,12 +10,15 @@ N8N="docker compose exec -T n8n n8n"
 # The credential file holds the API key: delete it however this script ends.
 trap 'rm -f build/credentials.json' EXIT
 
+# /healthz/readiness answers only once the database is migrated. On a fresh database, /healthz
+# answers earlier, and a CLI import started then runs its own migrations and fails with
+# SQLITE_PROTOCOL: locking protocol.
 wait_for_n8n() {
   for _ in $(seq 1 60); do
-    curl -sf http://localhost:5678/healthz >/dev/null && return 0
+    curl -sf http://localhost:5678/healthz/readiness >/dev/null && return 0
     sleep 2
   done
-  echo "n8n did not answer on http://localhost:5678/healthz within 120 s; see: docker compose logs n8n" >&2
+  echo "n8n was not ready on http://localhost:5678/healthz/readiness within 120 s; see: docker compose logs n8n" >&2
   exit 1
 }
 
