@@ -40,7 +40,7 @@ A record goes to Escalation if any of these holds:
 
 ## Results
 
-I ran the five samples and 10 extra messages through the live workflow. I wrote the extras (`samples-extra.json`) with intended outcomes and committed them before any run. I didn't write expected outcomes for the five samples independently of the prompt, so I didn't run the end-to-end comparison for them; they are scored against the prompt's own rules.
+I ran the five samples and 10 extra messages through the live workflow. I wrote the extras (`samples-extra.json`) with intended outcomes and committed them before any run. After x01 and x10 failed at baseline, I added the `actionable` rule and changed their intended reason from `low_confidence` to `not_actionable` before rerunning. I wrote my expected outcomes for the five samples (`tests/expected.json`) after the first run, so I had seen the outputs. The table scores category, queue and reasons.
 
 | # | Intended | Baseline | Final |
 |---|---|---|---|
@@ -70,10 +70,13 @@ I made four changes, and kept each only if nothing that had passed before then f
 
 On the prompt as of change 3, gpt-4o passed 14 of 15 at $0.0054 per message, against gpt-4o-mini's 12 of 15 at $0.0003. With change 4, gpt-4o-mini reaches 14 of 15 at a seventeenth of the cost. I didn't rerun gpt-4o on the final prompt.
 
+**Priority.** Against my expectations, the end-to-end test first passed 2 of the 5 samples, with samples 2, 3 and 4 off on priority only. I then replaced the prompt's priority rules with my policy (see `DECISIONS.md`): 3 of 5. Sample 3 (an invoice above the contract rate) is still Medium where I expect High, and sample 4 (an SSO evaluation question) is still Low where I expect Medium. The model's priority tracks its urgency reading. No category, queue or reason changed on any of the 15 messages.
+
 ## Known weaknesses
 
 - **Both safety nets are the model's own judgment.** Confidence is self-reported, and so is `actionable`.
 - **The outage boundary still leaks** (x08), which costs an unneeded escalation.
+- **Priority misses my policy on samples 3 and 4.** The model follows urgency instead.
 - **The tests are small and mine.** The rules were written knowing the samples.
 - **There is one category per message.** x07's billing question isn't routed.
 - **Record assembly isn't unit-tested.** It lives in a Code node template in `build-workflow.js`.

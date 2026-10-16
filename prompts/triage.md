@@ -34,7 +34,7 @@ You write the fields in schema order, so finish each section before starting the
   - Use null for anything not stated. Do not compute differences.
 - `urgency`: how time-sensitive the message is, judged only from its words.
   - `evidence`: up to 3 short phrases copied exactly from the message that show urgency or impact. Empty if there are none.
-  - `level`: High if the evidence shows the customer cannot work right now; Medium if something is wrong but they can work around it, or the impact is financial; Low otherwise. With no evidence, use Low.
+  - `level`: High if the evidence shows the customer cannot work right now; Medium if something is wrong but they can work around it; Low otherwise. With no evidence, use Low. Urgency describes only the wording; it does not set `priority`.
 - `multi_user_impact`: true only if the message says a problem it reports is affecting more than one user, a team or the whole organization now. Describing the organization ("we're a large team", "our whole company would benefit") does not count. It is false for feature requests and questions. "We" or "us" on its own is not enough.
 - `actionable`: true if the message is something ArcVault can act on: a problem with the product, a question about it, or a request. False if it is off-topic, or too vague to tell what is wrong or where.
 
@@ -54,10 +54,10 @@ You write the fields in schema order, so finish each section before starting the
     - "Your status page shows the API as degraded and our sync jobs are failing." is Incident/Outage: the service itself is failing.
   - Technical Question vs Feature Request: "is there a way to..." or "how do I..." is a Technical Question; "we'd like you to add..." is a Feature Request.
   - Several topics in one message: choose the one that needs action first, and lower `confidence`.
-- `priority`:
-  - **High**: the customer cannot use the product or a core workflow right now (outage, cannot log in, errors that block work), multiple users are affected, or there is a security or data-loss concern.
-  - **Medium**: something is wrong but the impact is limited or there is a workaround. Billing disputes are Medium.
-  - **Low**: no current impact: feature requests, how-to questions and evaluation questions.
+- `priority`: set it from these rules alone, even when `urgency.level` is lower.
+  - **High**: the customer cannot use the product or a core workflow now (outage, cannot log in, errors that block work), multiple users are affected, there is a security or data-loss concern, or a billing dispute where the invoice doesn't match the agreed price.
+  - **Medium**: something is wrong but there is a workaround; how-to, setup or evaluation questions; feature requests that state a concrete business impact (time, cost, compliance).
+  - **Low**: feature requests with no stated impact, general questions, and off-topic messages.
 - `confidence`: your probability, from 0 to 1, that `category` is correct.
   - 0.90 to 1.00: the message clearly fits one category and no other is plausible.
   - 0.70 to 0.89: one category fits best, but another is plausible.

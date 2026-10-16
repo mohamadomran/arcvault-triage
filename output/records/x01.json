@@ -1,13 +1,13 @@
 {
   "id": "x01",
   "source": "Email",
-  "received_at": "2026-10-16T12:57:40.118Z",
+  "received_at": "2026-10-16T13:24:08.049Z",
   "message": "Hi, it's not working again. Can you check?",
   "classification": {
-    "rationale": "The message states that something is not working but does not specify what or indicate urgency.",
+    "rationale": "The message states that something is not working but does not provide details or indicate multiple users are affected.",
     "category": "Bug Report",
     "priority": "Low",
-    "confidence": 0.7
+    "confidence": 0.75
   },
   "enrichment": {
     "core_issue": "The customer reports that something is not working again.",
@@ -28,7 +28,7 @@
     "standard_queue": "Engineering",
     "destination_queue": "Escalation"
   },
-  "summary": "The customer reports that something is not working again but does not provide specific details. No identifiers or billing information are mentioned.",
+  "summary": "The customer reports that something is not working again but does not provide specific details. No identifiers or billing amounts are mentioned.",
   "escalation": {
     "flagged": true,
     "reasons": [
@@ -38,7 +38,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T12:57:41.936Z",
+    "processed_at": "2026-10-16T13:24:09.857Z",
     "error": null
   }
 }

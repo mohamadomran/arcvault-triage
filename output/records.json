@@ -2,10 +2,10 @@
   {
     "id": 1,
     "source": "Email",
-    "received_at": "2026-10-16T12:57:28.003Z",
+    "received_at": "2026-10-16T13:23:55.855Z",
     "message": "Hi, I tried logging in this morning and keep getting a 403 error. My account is arcvault.io/user/jsmith. This started after your update last Tuesday.",
     "classification": {
-      "rationale": "The message describes a 403 error when logging in, indicating a problem with the product.",
+      "rationale": "The message describes a 403 error when logging in, indicating a potential bug after an update.",
       "category": "Bug Report",
       "priority": "High",
       "confidence": 0.95
@@ -41,7 +41,7 @@
       "standard_queue": "Engineering",
       "destination_queue": "Engineering"
     },
-    "summary": "The customer reports receiving a 403 error when trying to log in to their account at arcvault.io/user/jsmith. This issue began after a recent update last Tuesday, indicating a potential bug that needs addressing.",
+    "summary": "The customer reports a 403 error when attempting to log in to their account at arcvault.io/user/jsmith. This issue began after a recent update last Tuesday, indicating a potential bug that needs addressing.",
     "escalation": {
       "flagged": false,
       "reasons": [],
@@ -49,20 +49,20 @@
     },
     "meta": {
       "model": "gpt-4o-mini-2024-07-18",
-      "processed_at": "2026-10-16T12:57:30.496Z",
+      "processed_at": "2026-10-16T13:23:58.581Z",
       "error": null
     }
   },
   {
     "id": 2,
     "source": "Web Form",
-    "received_at": "2026-10-16T12:57:30.839Z",
+    "received_at": "2026-10-16T13:23:58.870Z",
     "message": "We'd love to see a bulk export feature for our audit logs. We're a compliance-heavy org and this would save us hours every month.",
     "classification": {
-      "rationale": "The message asks for a capability the customer believes does not exist.",
+      "rationale": "The message asks for a capability the customer believes does not exist, specifically a bulk export feature for audit logs.",
       "category": "Feature Request",
-      "priority": "Low",
-      "confidence": 0.95
+      "priority": "Medium",
+      "confidence": 0.85
     },
     "enrichment": {
       "core_issue": "The customer requests a bulk export feature for audit logs.",
@@ -83,7 +83,7 @@
       "standard_queue": "Product",
       "destination_queue": "Product"
     },
-    "summary": "The customer is requesting a bulk export feature for audit logs, stating that it would save their compliance-heavy organization hours every month.",
+    "summary": "The customer is requesting a bulk export feature for audit logs, stating that it would save them hours every month due to their compliance-heavy nature.",
     "escalation": {
       "flagged": false,
       "reasons": [],
@@ -91,23 +91,23 @@
     },
     "meta": {
       "model": "gpt-4o-mini-2024-07-18",
-      "processed_at": "2026-10-16T12:57:32.628Z",
+      "processed_at": "2026-10-16T13:24:01.069Z",
       "error": null
     }
   },
   {
     "id": 3,
     "source": "Support Portal",
-    "received_at": "2026-10-16T12:57:32.950Z",
+    "received_at": "2026-10-16T13:24:01.341Z",
     "message": "Invoice #8821 shows a charge of $1,240 but our contract rate is $980/month. Can someone look into this?",
     "classification": {
       "rationale": "The message discusses an invoice discrepancy, which falls under billing issues.",
       "category": "Billing Issue",
       "priority": "Medium",
-      "confidence": 0.9
+      "confidence": 0.85
     },
     "enrichment": {
-      "core_issue": "The customer reports a discrepancy between the invoiced amount and their contract rate.",
+      "core_issue": "The customer reports a discrepancy between the invoice amount and the contract rate.",
       "identifiers": [
         {
           "type": "invoice",
@@ -121,7 +121,7 @@
       },
       "urgency": {
         "evidence": [],
-        "level": "Medium"
+        "level": "Low"
       },
       "multi_user_impact": false,
       "actionable": true
@@ -138,14 +138,14 @@
     },
     "meta": {
       "model": "gpt-4o-mini-2024-07-18",
-      "processed_at": "2026-10-16T12:57:35.025Z",
+      "processed_at": "2026-10-16T13:24:03.524Z",
       "error": null
     }
   },
   {
     "id": 4,
     "source": "Email",
-    "received_at": "2026-10-16T12:57:35.329Z",
+    "received_at": "2026-10-16T13:24:03.784Z",
     "message": "I'm not sure if this is the right place to ask, but is there a way to set up SSO with Okta? We're evaluating switching our auth provider.",
     "classification": {
       "rationale": "The message asks how to set up SSO with Okta, indicating a technical question.",
@@ -172,7 +172,7 @@
       "standard_queue": "IT/Security",
       "destination_queue": "IT/Security"
     },
-    "summary": "The customer is inquiring about the possibility of setting up SSO with Okta as they are evaluating switching their authentication provider.",
+    "summary": "The customer is inquiring about the possibility of setting up SSO with Okta as they are evaluating a switch in their authentication provider. No identifiers or billing amounts are mentioned.",
     "escalation": {
       "flagged": false,
       "reasons": [],
@@ -180,14 +180,14 @@
     },
     "meta": {
       "model": "gpt-4o-mini-2024-07-18",
-      "processed_at": "2026-10-16T12:57:37.263Z",
+      "processed_at": "2026-10-16T13:24:05.658Z",
       "error": null
     }
   },
   {
     "id": 5,
     "source": "Web Form",
-    "received_at": "2026-10-16T12:57:37.559Z",
+    "received_at": "2026-10-16T13:24:05.922Z",
     "message": "Your dashboard stopped loading for us around 2pm EST. Checked our end — it's definitely on yours. Multiple users affected.",
     "classification": {
       "rationale": "The message states that the dashboard stopped loading and multiple users are affected, indicating a service issue.",
@@ -205,7 +205,7 @@
       },
       "urgency": {
         "evidence": [
-          "stopped loading for us around 2pm EST",
+          "stopped loading for us",
           "it's definitely on yours",
           "Multiple users affected"
         ],
@@ -229,7 +229,7 @@
     },
     "meta": {
       "model": "gpt-4o-mini-2024-07-18",
-      "processed_at": "2026-10-16T12:57:39.758Z",
+      "processed_at": "2026-10-16T13:24:07.736Z",
       "error": null
     }
   }

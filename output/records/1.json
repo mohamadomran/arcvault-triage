@@ -1,10 +1,10 @@
 {
   "id": 1,
   "source": "Email",
-  "received_at": "2026-10-16T12:57:28.003Z",
+  "received_at": "2026-10-16T13:23:55.855Z",
   "message": "Hi, I tried logging in this morning and keep getting a 403 error. My account is arcvault.io/user/jsmith. This started after your update last Tuesday.",
   "classification": {
-    "rationale": "The message describes a 403 error when logging in, indicating a problem with the product.",
+    "rationale": "The message describes a 403 error when logging in, indicating a potential bug after an update.",
     "category": "Bug Report",
     "priority": "High",
     "confidence": 0.95
@@ -40,7 +40,7 @@
     "standard_queue": "Engineering",
     "destination_queue": "Engineering"
   },
-  "summary": "The customer reports receiving a 403 error when trying to log in to their account at arcvault.io/user/jsmith. This issue began after a recent update last Tuesday, indicating a potential bug that needs addressing.",
+  "summary": "The customer reports a 403 error when attempting to log in to their account at arcvault.io/user/jsmith. This issue began after a recent update last Tuesday, indicating a potential bug that needs addressing.",
   "escalation": {
     "flagged": false,
     "reasons": [],
@@ -48,7 +48,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T12:57:30.496Z",
+    "processed_at": "2026-10-16T13:23:58.581Z",
     "error": null
   }
 }

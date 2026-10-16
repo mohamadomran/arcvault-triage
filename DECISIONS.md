@@ -68,3 +68,12 @@ Decisions I have approved, and why. Newest at the bottom.
 
 - **Messages with nothing to act on go to Escalation.** The model fills `enrichment.actionable`: true for a problem with the product, a question about it or a request; false for an off-topic message or one too vague to tell what is wrong or where. When it is false, code adds the reason `not_actionable`. The record keeps its standard queue. This is the low-confidence fallback driven by an extracted fact instead of self-reported confidence, which never dropped below 0.70 in any run: 0.85 on the vague message and 0.95 on the off-topic one in the run before this change, and 0.80 at its lowest in the baseline.
 - **x01 and x10 now intend `not_actionable`.** Before the rule existed, their only route to Escalation was `low_confidence`. I changed their intended reason before the rerun, in a separate commit, so the change couldn't be fitted to the results.
+
+## Priority policy
+
+- **My priority policy.** Priority is the triage judgment; it doesn't affect routing.
+  - **High**: the customer can't use the product or a core workflow now, multiple users are affected, there is a security or data-loss concern, or the invoice doesn't match the agreed price. A wrong invoice takes the customer's money and their trust at the same time, so I treat it like a blocking problem, not a routine billing question.
+  - **Medium**: something is wrong but there is a workaround; how-to, setup or evaluation questions; feature requests that state a concrete business impact (time, cost, compliance). An evaluation or setup question can decide a purchase or a rollout, and a feature request with a stated cost tells me what the gap is worth.
+  - **Low**: feature requests with no stated impact, general questions and off-topic messages.
+- **Urgency doesn't set priority.** Urgency stays a reading of the message's wording; the prompt now says so, and I dropped "the impact is financial" from urgency's Medium level, because under my policy a billing mismatch is a priority call, not an urgency one.
+- **I kept the policy because routing didn't move.** On all 15 messages, no category, queue or escalation reason changed. That was the condition, since priority doesn't feed routing.
