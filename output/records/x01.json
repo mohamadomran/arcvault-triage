@@ -1,13 +1,13 @@
 {
   "id": "x01",
   "source": "Email",
-  "received_at": "2026-10-16T12:32:53.269Z",
+  "received_at": "2026-10-16T12:57:40.118Z",
   "message": "Hi, it's not working again. Can you check?",
   "classification": {
-    "rationale": "The message indicates that something is not working, suggesting a potential incident.",
-    "category": "Incident/Outage",
-    "priority": "High",
-    "confidence": 0.85
+    "rationale": "The message states that something is not working but does not specify what or indicate urgency.",
+    "category": "Bug Report",
+    "priority": "Low",
+    "confidence": 0.7
   },
   "enrichment": {
     "core_issue": "The customer reports that something is not working again.",
@@ -18,28 +18,27 @@
       "currency": null
     },
     "urgency": {
-      "evidence": [
-        "not working again"
-      ],
-      "level": "High"
+      "evidence": [],
+      "level": "Low"
     },
-    "multi_user_impact": false
+    "multi_user_impact": false,
+    "actionable": false
   },
   "routing": {
     "standard_queue": "Engineering",
     "destination_queue": "Escalation"
   },
-  "summary": "The customer reports that something is not working again. This indicates a potential incident that may require immediate attention.",
+  "summary": "The customer reports that something is not working again but does not provide specific details. No identifiers or billing information are mentioned.",
   "escalation": {
     "flagged": true,
     "reasons": [
-      "incident_category"
+      "not_actionable"
     ],
     "billing_discrepancy": null
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T12:32:55.014Z",
+    "processed_at": "2026-10-16T12:57:41.936Z",
     "error": null
   }
 }

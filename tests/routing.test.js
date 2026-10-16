@@ -11,6 +11,7 @@ function llmOutput({
   confidence = 0.95,
   billing = {},
   multiUser = false,
+  actionable = true,
 } = {}) {
   return {
     enrichment: {
@@ -24,6 +25,7 @@ function llmOutput({
       },
       urgency: { evidence: [], level: "Low" },
       multi_user_impact: multiUser,
+      actionable,
     },
     classification: {
       rationale: "Fixture.",
@@ -94,6 +96,29 @@ describe("confidence threshold", () => {
 
   test("0.70 does not escalate", () => {
     assert.deepEqual(reasonsFor(llmOutput({ confidence: 0.7 })), []);
+  });
+});
+
+describe("not actionable", () => {
+  test("actionable false escalates and keeps the standard queue", () => {
+    assert.deepEqual(
+      route(llmOutput({ category: "Technical Question", actionable: false }), QUIET),
+      {
+        routing: {
+          standard_queue: "IT/Security",
+          destination_queue: "Escalation",
+        },
+        escalation: {
+          flagged: true,
+          reasons: ["not_actionable"],
+          billing_discrepancy: null,
+        },
+      },
+    );
+  });
+
+  test("actionable true does not escalate", () => {
+    assert.deepEqual(reasonsFor(llmOutput({ actionable: true })), []);
   });
 });
 
@@ -289,6 +314,7 @@ describe("several reasons on one record", () => {
       category: "Incident/Outage",
       confidence: 0.5,
       multiUser: true,
+      actionable: false,
       billing: { invoiced_amount: 2000, contract_amount: 980 },
     });
     assert.deepEqual(route(llm, "Total outage, everything is down."), {
@@ -300,6 +326,7 @@ describe("several reasons on one record", () => {
         flagged: true,
         reasons: [
           "low_confidence",
+          "not_actionable",
           "outage_keyword",
           "multi_user_impact",
           "incident_category",
@@ -320,16 +347,18 @@ describe("invariants over every combination", () => {
     for (const confidence of [0.69, 0.7, 0.95])
       for (const invoiced_amount of [null, 1480, 1481, 400])
         for (const multiUser of [false, true])
-          for (const message of [QUIET, "Total outage."])
-            cases.push([
-              llmOutput({
-                category,
-                confidence,
-                multiUser,
-                billing: { invoiced_amount, contract_amount: 980 },
-              }),
-              message,
-            ]);
+          for (const actionable of [true, false])
+            for (const message of [QUIET, "Total outage."])
+              cases.push([
+                llmOutput({
+                  category,
+                  confidence,
+                  multiUser,
+                  actionable,
+                  billing: { invoiced_amount, contract_amount: 980 },
+                }),
+                message,
+              ]);
 
   const queues = schema.$defs.routing.properties.destination_queue.enum;
   const reasonOrder = schema.$defs.escalation.properties.reasons.items.enum;

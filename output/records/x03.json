@@ -1,10 +1,10 @@
 {
   "id": "x03",
   "source": "Web Form",
-  "received_at": "2026-10-16T12:32:57.669Z",
+  "received_at": "2026-10-16T12:57:45.046Z",
   "message": "Every time I upload a CSV larger than 5 MB I get error 504. Smaller files go through fine.",
   "classification": {
-    "rationale": "The message describes an error occurring when uploading larger files, indicating a specific issue with the product.",
+    "rationale": "The message describes an error occurring during a specific action (uploading large CSV files).",
     "category": "Bug Report",
     "priority": "Medium",
     "confidence": 0.85
@@ -26,13 +26,14 @@
       "evidence": [],
       "level": "Low"
     },
-    "multi_user_impact": false
+    "multi_user_impact": false,
+    "actionable": true
   },
   "routing": {
     "standard_queue": "Engineering",
     "destination_queue": "Engineering"
   },
-  "summary": "The customer reports receiving error 504 when uploading CSV files larger than 5 MB, while smaller files upload successfully. This issue may affect their ability to work with larger datasets.",
+  "summary": "The customer reports receiving error 504 when uploading CSV files larger than 5 MB, while smaller files upload successfully. The issue appears to be isolated to larger files.",
   "escalation": {
     "flagged": false,
     "reasons": [],
@@ -40,7 +41,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T12:32:59.782Z",
+    "processed_at": "2026-10-16T12:57:47.051Z",
     "error": null
   }
 }

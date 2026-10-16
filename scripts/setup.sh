@@ -19,15 +19,15 @@ wait_for_n8n() {
   exit 1
 }
 
-# /healthz answers before the published workflow's webhook is registered. A GET to the webhook
-# returns n8n's "not registered for GET requests" only once the POST webhook exists, and it
-# starts no execution.
-wait_for_webhook() {
+# After a restart n8n serves the previously published version for a few seconds. Wait until
+# GET /webhook/intake-build returns the build id of the workflow.json just imported.
+wait_for_build() {
+  build=$(node -e 'const w = require("./workflow.json"); console.log(w.nodes.find((n) => n.name === "Setup · Build check").parameters.options.responseData)')
   for _ in $(seq 1 60); do
-    curl -s http://localhost:5678/webhook/intake | grep -q "Did you mean to make a POST request" && return 0
+    [ "$(curl -s http://localhost:5678/webhook/intake-build)" = "$build" ] && return 0
     sleep 2
   done
-  echo "the intake webhook was not registered within 120 s; see: docker compose logs n8n" >&2
+  echo "n8n is not serving build $build after 120 s; see: docker compose logs n8n" >&2
   exit 1
 }
 
@@ -52,5 +52,5 @@ $N8N publish:workflow --id="$WORKFLOW_ID"
 # The running server only picks up CLI changes after a restart.
 docker compose restart n8n
 wait_for_n8n
-wait_for_webhook
+wait_for_build
 echo "ready: POST http://localhost:5678/webhook/intake"

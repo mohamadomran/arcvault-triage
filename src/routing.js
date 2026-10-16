@@ -64,6 +64,9 @@ function escalationReasons(llm, message) {
   const fired = {
     low_confidence:
       usable && llm.classification.confidence < CONFIDENCE_THRESHOLD,
+    // The model's own confidence stays high on vague and off-topic messages, so the
+    // low-confidence fallback also uses an extracted fact: is there anything to act on?
+    not_actionable: usable && llm.enrichment?.actionable === false,
     outage_keyword: OUTAGE_PATTERN.test(message),
     multi_user_impact:
       usable &&

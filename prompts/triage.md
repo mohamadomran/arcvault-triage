@@ -36,6 +36,7 @@ You write the fields in schema order, so finish each section before starting the
   - `evidence`: up to 3 short phrases copied exactly from the message that show urgency or impact. Empty if there are none.
   - `level`: High if the evidence shows the customer cannot work right now; Medium if something is wrong but they can work around it, or the impact is financial; Low otherwise. With no evidence, use Low.
 - `multi_user_impact`: true only if the message says a problem it reports is affecting more than one user, a team or the whole organization now. Describing the organization ("we're a large team", "our whole company would benefit") does not count. It is false for feature requests and questions. "We" or "us" on its own is not enough.
+- `actionable`: true if the message is something ArcVault can act on: a problem with the product, a question about it, or a request. False if it is off-topic, or too vague to tell what is wrong or where.
 
 ### 2. classification
 

@@ -1,7 +1,7 @@
 {
   "id": "x04",
   "source": "Email",
-  "received_at": "2026-10-16T12:33:00.103Z",
+  "received_at": "2026-10-16T12:57:47.375Z",
   "message": "Nothing loads for anyone at our company. The whole app is down since 8am and we have a client demo at noon.",
   "classification": {
     "rationale": "The message states that the whole app is down for the company, affecting multiple users.",
@@ -25,13 +25,14 @@
       ],
       "level": "High"
     },
-    "multi_user_impact": true
+    "multi_user_impact": true,
+    "actionable": true
   },
   "routing": {
     "standard_queue": "Engineering",
     "destination_queue": "Escalation"
   },
-  "summary": "The customer reports that the whole app is down for their company since 8am, affecting all users. They have a client demo scheduled at noon.",
+  "summary": "The customer reports that the whole app is down for their company since 8am, affecting all users. They have a client demo scheduled at noon, indicating high urgency.",
   "escalation": {
     "flagged": true,
     "reasons": [
@@ -43,7 +44,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T12:33:02.411Z",
+    "processed_at": "2026-10-16T12:57:49.491Z",
     "error": null
   }
 }

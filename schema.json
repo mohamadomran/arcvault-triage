@@ -69,7 +69,7 @@
         "enrichment": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["core_issue", "identifiers", "billing", "urgency", "multi_user_impact"],
+          "required": ["core_issue", "identifiers", "billing", "urgency", "multi_user_impact", "actionable"],
           "properties": {
             "core_issue": { "type": "string" },
             "identifiers": {
@@ -106,7 +106,8 @@
                 "level": { "type": "string", "enum": ["Low", "Medium", "High"] }
               }
             },
-            "multi_user_impact": { "type": "boolean" }
+            "multi_user_impact": { "type": "boolean" },
+            "actionable": { "type": "boolean" }
           }
         },
         "classification": {
@@ -167,6 +168,7 @@
             "type": "string",
             "enum": [
               "low_confidence",
+              "not_actionable",
               "outage_keyword",
               "multi_user_impact",
               "incident_category",

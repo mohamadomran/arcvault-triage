@@ -1,7 +1,7 @@
 {
   "id": 2,
   "source": "Web Form",
-  "received_at": "2026-10-16T12:32:44.150Z",
+  "received_at": "2026-10-16T12:57:30.839Z",
   "message": "We'd love to see a bulk export feature for our audit logs. We're a compliance-heavy org and this would save us hours every month.",
   "classification": {
     "rationale": "The message asks for a capability the customer believes does not exist.",
@@ -21,13 +21,14 @@
       "evidence": [],
       "level": "Low"
     },
-    "multi_user_impact": false
+    "multi_user_impact": false,
+    "actionable": true
   },
   "routing": {
     "standard_queue": "Product",
     "destination_queue": "Product"
   },
-  "summary": "The customer is requesting a bulk export feature for audit logs, stating that it would save them hours every month due to their compliance-heavy nature.",
+  "summary": "The customer is requesting a bulk export feature for audit logs, stating that it would save their compliance-heavy organization hours every month.",
   "escalation": {
     "flagged": false,
     "reasons": [],
@@ -35,7 +36,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T12:32:46.021Z",
+    "processed_at": "2026-10-16T12:57:32.628Z",
     "error": null
   }
 }

@@ -3,6 +3,7 @@
 // Run: node scripts/build-workflow.js
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 
 const root = path.join(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
@@ -231,6 +232,29 @@ const connections = {
     ],
   },
 };
+
+// After a restart, n8n serves the previously published version for a few seconds before it
+// switches to the new one. The build id is a hash of the pipeline; GET /webhook/intake-build
+// returns it, so setup.sh can wait until the version it just published is the one serving.
+const BUILD_ID = crypto
+  .createHash("sha256")
+  .update(JSON.stringify({ nodes, connections }))
+  .digest("hex")
+  .slice(0, 12);
+nodes.push({
+  id: "a1f0c001-0000-4000-8000-000000000009",
+  name: "Setup · Build check",
+  type: "n8n-nodes-base.webhook",
+  typeVersion: 2,
+  position: [0, 200],
+  webhookId: "a1f0c001-0000-4000-8000-0000000000bb",
+  parameters: {
+    httpMethod: "GET",
+    path: "intake-build",
+    responseMode: "onReceived",
+    options: { responseData: BUILD_ID },
+  },
+});
 
 const workflow = {
   id: WORKFLOW_ID,

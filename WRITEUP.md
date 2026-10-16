@@ -13,7 +13,7 @@ A POST to `/webhook/intake` with `id`, `source` and `message` runs these nodes, 
 
 n8n keeps the workflow, the encrypted credential and its execution history in `./.n8n`. There is no other database. The logic lives in `prompts/triage.md`, `schema.json` and `src/routing.js`, and `scripts/build-workflow.js` generates `workflow.json` from them.
 
-**Model:** gpt-4o-mini at temperature 0. It supports strict JSON-schema output, costs about $0.0003 per message and answers in 2–4 seconds. gpt-4o scored higher (see Results) at about 17 times the cost.
+**Model:** gpt-4o-mini at temperature 0. It supports strict JSON-schema output, costs about $0.0003 per message and answers in 2–4 seconds. On an earlier prompt gpt-4o scored higher, at about 17 times the cost; the final gpt-4o-mini prompt matches that score (see Results).
 
 ## Routing
 
@@ -30,7 +30,7 @@ Technical questions go to IT/Security because the realistic ones are about setup
 
 A record goes to Escalation if any of these holds:
 
-- **Confidence is below 0.70.** This is also the low-confidence fallback.
+- **Confidence is below 0.70, or the model marks the message as not actionable** (off-topic, or too vague to tell what is wrong). Together these are the low-confidence fallback. The second rule exists because self-reported confidence never dropped below 0.85, even on vague and off-topic messages.
 - **There is an outage signal:**
   - an outage keyword in the raw message ("outage", "is down", "down for");
   - multiple users affected, counted only on a Bug Report or Incident/Outage;
@@ -42,14 +42,14 @@ A record goes to Escalation if any of these holds:
 
 I ran the five samples and 10 extra messages through the live workflow. I wrote the extras (`samples-extra.json`) with intended outcomes and committed them before any run. I didn't write expected outcomes for the five samples independently of the prompt, so I didn't run the end-to-end comparison for them; they are scored against the prompt's own rules.
 
-| # | Intended | Baseline | After fixes |
+| # | Intended | Baseline | Final |
 |---|---|---|---|
 | 1 | Bug Report → Engineering | Incident/Outage → Escalation ✗ | ✓ |
 | 2 | Feature Request → Product | Escalation (multi-user) ✗ | ✓ |
 | 3 | Billing Issue → Billing | ✓ | ✓ |
 | 4 | Technical Question → IT/Security | ✓ | ✓ |
 | 5 | Incident/Outage → Escalation | ✓ | ✓ |
-| x01 vague | Escalation (low confidence) | Bug Report, 0.80 ✗ | Incident/Outage, 0.85 ✗ |
+| x01 vague | Escalation (not actionable) | Bug Report → Engineering ✗ | ✓ |
 | x02 $650 overcharge | Billing Issue → Escalation | extra multi-user reason ✗ | ✓ |
 | x03 one user's 504 | Bug Report → Engineering | ✓ | ✓ |
 | x04 whole app down | Incident/Outage → Escalation | ✓ | ✓ |
@@ -58,20 +58,21 @@ I ran the five samples and 10 extra messages through the live workflow. I wrote 
 | x07 bug plus billing question | Bug Report → Engineering | ✓ | ✓ |
 | x08 injection; one user can't sign in | Bug Report, High → Engineering | Incident/Outage ✗ | Incident/Outage ✗ (priority stayed High) |
 | x09 Spanish bug report | Bug Report → Engineering | ✓ | ✓ |
-| x10 off-topic | Escalation (low confidence) | Technical Question, 0.90 ✗ | Technical Question, 0.95 ✗ |
-| **Total** | | **8/15** (samples 3/5) | **12/15** (samples 5/5) |
+| x10 off-topic | Escalation (not actionable) | Technical Question → IT/Security ✗ | ✓ |
+| **Total** | | **8/15** (samples 3/5) | **14/15** (samples 5/5) |
 
-I made three changes, and kept each only if nothing that had passed before then failed:
+I made four changes, and kept each only if nothing that had passed before then failed:
 
 1. Routing counts multi-user only on problem reports: 8 to 11.
 2. The prompt limits multi-user impact to a reported problem affecting users now: 11.
-3. Three self-written examples on the outage boundary: 12, which fixed sample 1.
+3. Three self-written examples on the outage boundary: 12. This fixed sample 1, and my made-up 502 message is now a Bug Report too.
+4. An `actionable` flag escalates vague and off-topic messages: 14. For x01 and x10 I changed the intended reason from `low_confidence` to `not_actionable` before this run.
 
-On the same prompt and messages, gpt-4o passed 14 of 15 at $0.0054 per message, against gpt-4o-mini's 12 of 15 at $0.0003. gpt-4o fixed x08 and scored x10 at 0.5.
+On the prompt as of change 3, gpt-4o passed 14 of 15 at $0.0054 per message, against gpt-4o-mini's 12 of 15 at $0.0003. With change 4, gpt-4o-mini reaches 14 of 15 at a seventeenth of the cost. I didn't rerun gpt-4o on the final prompt.
 
 ## Known weaknesses
 
-- **Confidence is self-reported.** gpt-4o-mini gave 0.95 to an off-topic message.
+- **Both safety nets are the model's own judgment.** Confidence is self-reported, and so is `actionable`.
 - **The outage boundary still leaks** (x08), which costs an unneeded escalation.
 - **The tests are small and mine.** The rules were written knowing the samples.
 - **There is one category per message.** x07's billing question isn't routed.

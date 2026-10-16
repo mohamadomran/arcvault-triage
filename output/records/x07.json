@@ -1,10 +1,10 @@
 {
   "id": "x07",
   "source": "Support Portal",
-  "received_at": "2026-10-16T12:33:07.171Z",
+  "received_at": "2026-10-16T12:57:53.624Z",
   "message": "The PDF download link on the invoices page opens a blank tab. Also, while you're looking, can you confirm whether we're still on the annual plan?",
   "classification": {
-    "rationale": "The message describes a broken feature (PDF download link) but does not indicate it affects multiple users or the entire service.",
+    "rationale": "The message describes a broken feature (PDF download link) and includes a question about the account plan.",
     "category": "Bug Report",
     "priority": "Low",
     "confidence": 0.85
@@ -21,7 +21,8 @@
       "evidence": [],
       "level": "Low"
     },
-    "multi_user_impact": false
+    "multi_user_impact": false,
+    "actionable": true
   },
   "routing": {
     "standard_queue": "Engineering",
@@ -35,7 +36,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T12:33:09.144Z",
+    "processed_at": "2026-10-16T12:57:55.477Z",
     "error": null
   }
 }
