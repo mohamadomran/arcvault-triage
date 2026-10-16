@@ -1,0 +1,41 @@
+{
+  "id": "x05",
+  "source": "Web Form",
+  "received_at": "2026-10-16T12:33:02.721Z",
+  "message": "Could you add a drop-down for choosing the timezone on scheduled reports?",
+  "classification": {
+    "rationale": "The message asks for a capability the customer believes does not exist.",
+    "category": "Feature Request",
+    "priority": "Low",
+    "confidence": 0.95
+  },
+  "enrichment": {
+    "core_issue": "The customer requests a drop-down for choosing the timezone on scheduled reports.",
+    "identifiers": [],
+    "billing": {
+      "invoiced_amount": null,
+      "contract_amount": null,
+      "currency": null
+    },
+    "urgency": {
+      "evidence": [],
+      "level": "Low"
+    },
+    "multi_user_impact": false
+  },
+  "routing": {
+    "standard_queue": "Product",
+    "destination_queue": "Product"
+  },
+  "summary": "The customer is requesting the addition of a drop-down menu for selecting the timezone on scheduled reports.",
+  "escalation": {
+    "flagged": false,
+    "reasons": [],
+    "billing_discrepancy": null
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T12:33:04.398Z",
+    "error": null
+  }
+}

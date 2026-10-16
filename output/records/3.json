@@ -1,10 +1,10 @@
 {
   "id": 3,
   "source": "Support Portal",
-  "received_at": "2026-10-16T12:01:04.870Z",
+  "received_at": "2026-10-16T12:32:46.304Z",
   "message": "Invoice #8821 shows a charge of $1,240 but our contract rate is $980/month. Can someone look into this?",
   "classification": {
-    "rationale": "The message discusses an invoice discrepancy, indicating a billing issue.",
+    "rationale": "The message discusses a discrepancy in billing related to an invoice and contract rate.",
     "category": "Billing Issue",
     "priority": "Medium",
     "confidence": 0.9
@@ -40,7 +40,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T12:01:06.884Z",
+    "processed_at": "2026-10-16T12:32:48.436Z",
     "error": null
   }
 }

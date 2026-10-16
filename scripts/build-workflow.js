@@ -196,6 +196,9 @@ const nodes = [
       jsonBody: `={{ JSON.stringify(${ref(N.route)}) }}`,
       options: {},
     },
+    // The record is already on disk, so a failed POST (webhook.site's free URL takes 50 requests,
+    // then answers 429) must not turn the intake into an error: the error output also responds.
+    onError: "continueErrorOutput",
   },
   {
     id: "a1f0c001-0000-4000-8000-000000000008",
@@ -221,7 +224,12 @@ const connections = {
   [N.route]: next(N.toFile),
   [N.toFile]: next(N.write),
   [N.write]: next(N.post),
-  [N.post]: next(N.respond),
+  [N.post]: {
+    main: [
+      [{ node: N.respond, type: "main", index: 0 }],
+      [{ node: N.respond, type: "main", index: 0 }],
+    ],
+  },
 };
 
 const workflow = {

@@ -1,0 +1,49 @@
+{
+  "id": "x04",
+  "source": "Email",
+  "received_at": "2026-10-16T12:33:00.103Z",
+  "message": "Nothing loads for anyone at our company. The whole app is down since 8am and we have a client demo at noon.",
+  "classification": {
+    "rationale": "The message states that the whole app is down for the company, affecting multiple users.",
+    "category": "Incident/Outage",
+    "priority": "High",
+    "confidence": 0.95
+  },
+  "enrichment": {
+    "core_issue": "The customer reports that the whole app is down for their company.",
+    "identifiers": [],
+    "billing": {
+      "invoiced_amount": null,
+      "contract_amount": null,
+      "currency": null
+    },
+    "urgency": {
+      "evidence": [
+        "Nothing loads for anyone at our company.",
+        "The whole app is down since 8am.",
+        "we have a client demo at noon."
+      ],
+      "level": "High"
+    },
+    "multi_user_impact": true
+  },
+  "routing": {
+    "standard_queue": "Engineering",
+    "destination_queue": "Escalation"
+  },
+  "summary": "The customer reports that the whole app is down for their company since 8am, affecting all users. They have a client demo scheduled at noon.",
+  "escalation": {
+    "flagged": true,
+    "reasons": [
+      "outage_keyword",
+      "multi_user_impact",
+      "incident_category"
+    ],
+    "billing_discrepancy": null
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T12:33:02.411Z",
+    "error": null
+  }
+}

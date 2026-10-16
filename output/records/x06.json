@@ -1,0 +1,41 @@
+{
+  "id": "x06",
+  "source": "Web Form",
+  "received_at": "2026-10-16T12:33:04.663Z",
+  "message": "It would help all our users if dashboards could be shared through a read-only public link.",
+  "classification": {
+    "rationale": "The message asks for a capability the customer believes does not exist.",
+    "category": "Feature Request",
+    "priority": "Low",
+    "confidence": 0.95
+  },
+  "enrichment": {
+    "core_issue": "The customer requests the ability to share dashboards through a read-only public link.",
+    "identifiers": [],
+    "billing": {
+      "invoiced_amount": null,
+      "contract_amount": null,
+      "currency": null
+    },
+    "urgency": {
+      "evidence": [],
+      "level": "Low"
+    },
+    "multi_user_impact": false
+  },
+  "routing": {
+    "standard_queue": "Product",
+    "destination_queue": "Product"
+  },
+  "summary": "The customer is requesting a feature that allows dashboards to be shared through a read-only public link. This request is aimed at benefiting all users.",
+  "escalation": {
+    "flagged": false,
+    "reasons": [],
+    "billing_discrepancy": null
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T12:33:06.909Z",
+    "error": null
+  }
+}

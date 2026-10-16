@@ -1,0 +1,41 @@
+{
+  "id": "x09",
+  "source": "Email",
+  "received_at": "2026-10-16T12:33:11.623Z",
+  "message": "Hola, cuando intento descargar el informe mensual en PDF, la aplicación muestra un error y se cierra. Solo me pasa a mí.",
+  "classification": {
+    "rationale": "The message describes an error in the application that affects only one user.",
+    "category": "Bug Report",
+    "priority": "Low",
+    "confidence": 0.9
+  },
+  "enrichment": {
+    "core_issue": "The customer reports an error when trying to download the monthly report in PDF format.",
+    "identifiers": [],
+    "billing": {
+      "invoiced_amount": null,
+      "contract_amount": null,
+      "currency": null
+    },
+    "urgency": {
+      "evidence": [],
+      "level": "Low"
+    },
+    "multi_user_impact": false
+  },
+  "routing": {
+    "standard_queue": "Engineering",
+    "destination_queue": "Engineering"
+  },
+  "summary": "The customer reports an error when attempting to download the monthly report in PDF format, causing the application to crash. This issue is occurring only for them.",
+  "escalation": {
+    "flagged": false,
+    "reasons": [],
+    "billing_discrepancy": null
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T12:33:13.586Z",
+    "error": null
+  }
+}

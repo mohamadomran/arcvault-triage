@@ -35,7 +35,7 @@ You write the fields in schema order, so finish each section before starting the
 - `urgency`: how time-sensitive the message is, judged only from its words.
   - `evidence`: up to 3 short phrases copied exactly from the message that show urgency or impact. Empty if there are none.
   - `level`: High if the evidence shows the customer cannot work right now; Medium if something is wrong but they can work around it, or the impact is financial; Low otherwise. With no evidence, use Low.
-- `multi_user_impact`: true only if the message says more than one user, a team or the whole organization is affected. "We" or "us" on its own is not enough.
+- `multi_user_impact`: true only if the message says a problem it reports is affecting more than one user, a team or the whole organization now. Describing the organization ("we're a large team", "our whole company would benefit") does not count. It is false for feature requests and questions. "We" or "us" on its own is not enough.
 
 ### 2. classification
 
@@ -47,7 +47,10 @@ You write the fields in schema order, so finish each section before starting the
   - **Billing Issue**: invoices, charges, payments, pricing, refunds or contract rates.
   - **Technical Question**: asks how to do something or whether something is possible (setup, configuration, integrations, API use), with nothing reported broken.
 - Tie-breakers:
-  - Bug Report vs Incident/Outage: one user's error is a Bug Report. It is Incident/Outage only when the service is down or multiple users are affected. Classify by the scope the message states, not by the type of error.
+  - Bug Report vs Incident/Outage: one user's error is a Bug Report. It is Incident/Outage only when the service is down or multiple users are affected. Classify by the scope the message states, not by the type of error. For example:
+    - "I get error 503 every time I save my profile settings." is a Bug Report: one user, even with a server error.
+    - "None of our 40 support agents can open tickets since 9am." is Incident/Outage: many users affected now.
+    - "Your status page shows the API as degraded and our sync jobs are failing." is Incident/Outage: the service itself is failing.
   - Technical Question vs Feature Request: "is there a way to..." or "how do I..." is a Technical Question; "we'd like you to add..." is a Feature Request.
   - Several topics in one message: choose the one that needs action first, and lower `confidence`.
 - `priority`:

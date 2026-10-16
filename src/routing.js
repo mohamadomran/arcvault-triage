@@ -11,6 +11,9 @@ const QUEUE_BY_CATEGORY = {
 };
 
 const ESCALATION_QUEUE = "Escalation";
+// Multi-user impact is an outage signal only on a problem report. On a feature request,
+// billing issue or question it describes who is asking, not an incident.
+const MULTI_USER_CATEGORIES = ["Bug Report", "Incident/Outage"];
 const CONFIDENCE_THRESHOLD = 0.7; // escalate below this
 const BILLING_DISCREPANCY_LIMIT = 500; // escalate when invoiced minus contract exceeds this
 
@@ -62,7 +65,10 @@ function escalationReasons(llm, message) {
     low_confidence:
       usable && llm.classification.confidence < CONFIDENCE_THRESHOLD,
     outage_keyword: OUTAGE_PATTERN.test(message),
-    multi_user_impact: usable && llm.enrichment?.multi_user_impact === true,
+    multi_user_impact:
+      usable &&
+      llm.enrichment?.multi_user_impact === true &&
+      MULTI_USER_CATEGORIES.includes(llm.classification.category),
     incident_category:
       usable && llm.classification.category === "Incident/Outage",
     billing_discrepancy_over_500:

@@ -34,3 +34,24 @@ Each time the AI assistant made a mistake or was corrected, or the model's outpu
 
 - **"drop-down for" matched the outage pattern.** The `down for` alternative had only a word boundary before "down", so "Can you add a drop-down for this?" escalated with `outage_keyword`, contradicting `DECISIONS.md`. Caught in final review. Fix: the alternative is now `(?<![\w-])down\s+for\b`, and the false-positive tests include that message. None of the five samples contains "down for", so their records are unchanged.
 - **Unreproducible claim in the write-up.** `WRITEUP.md` said all records validate against `schema.json`. The check used a validator that is not in this repo, so a reader could not rerun it. Caught in final review. Fix: removed the claim.
+- **Wiped a fix during a sabotage check.** To restore after reverting the "drop-down for" fix, I ran `git checkout -- src/routing.js`, which also discarded the uncommitted fix. Caught right away from the file-change notice. Fix: re-applied the fix and reran the tests before committing. Later sabotage checks restore from a copy of the fixed file.
+
+## Extra test set and fixes
+
+All runs: the five samples plus the 10 extras in `samples-extra.json`, through the running workflow, gpt-4o-mini-2024-07-18. The five samples are scored against the prompt's own rules, because `tests/expected.json` has no values.
+
+- **Baseline: 8 of 15.** Wrong model outputs:
+  - Sample 1 (one user's 403): Incident/Outage, confidence 0.90.
+  - Sample 2 (feature request): `multi_user_impact: true` from "We're a compliance-heavy org", so it was escalated.
+  - x01 (vague, "it's not working again"): Bug Report at 0.80, where the prompt says a message too vague to tell scores below 0.70.
+  - x02 (billing): `multi_user_impact: true` from "our finance team", which added a reason to an already escalated record.
+  - x06 (feature request for "all our users"): `multi_user_impact: true`, so it was escalated.
+  - x08 (injection plus one user who can't sign in): Incident/Outage at 0.90. The injection didn't work: priority stayed High.
+  - x10 (off-topic pizza question): Technical Question at 0.90, sent to IT/Security.
+  Caught by the run. Fix: the changes below.
+- **Change 1, routing: the multi-user flag escalates only Bug Report and Incident/Outage.** Rerouting the baseline's model output with the new rule: 8 to 11 of 15 (sample 2, x02 and x06 fixed), with no new failures. Kept.
+- **Change 2, prompt: `multi_user_impact` scoped to a reported problem affecting users now.** C1 (changes 1 and 2): 11 of 15. `multi_user_impact` became false on sample 2 and x02; x06 still set it, but change 1 covers it. x01 moved from Bug Report at 0.80 to Incident/Outage at 0.90, which escalates it, but for the wrong reason, so it still fails. Nothing that passed before failed. Kept.
+- **Change 3, prompt: three self-written Bug Report vs Incident/Outage examples.** C2 (changes 1 to 3): 12 of 15. Sample 1 became a Bug Report and went to Engineering; x06 no longer sets `multi_user_impact`. Nothing that passed before failed. Kept.
+- **Still wrong after the fixes:** x01 (Incident/Outage at 0.85 on a vague message), x08 (Incident/Outage for one user who can't sign in) and x10 (Technical Question at 0.95 on an off-topic message). All three are confidence or boundary errors that the prompt rules didn't fix.
+- **`setup.sh` reported ready too early.** It waited for `/healthz`, which answers before the published workflow's webhook is registered, so the first POST of a run got a 404. Caught on the first C1 run. Fix: `setup.sh` now waits until the webhook is registered.
+- **webhook.site's request cap failed the whole intake.** The free URL took 50 requests, then answered 429 "Request limit exceeded", and the POST node turned that into an HTTP 500 for the caller even though the record file was already written. Caught on the C2 run (x03). First fix attempt: `onError: continueRegularOutput` on the POST node. n8n still stopped on the 429 (checked in the execution data). Fix: `continueErrorOutput`, with both outputs connected to the response, the setting already proven on the LLM node. With webhook.site still answering 429, a probe message then returned HTTP 200.

@@ -39,7 +39,7 @@ A record goes to the Escalation queue if any of these holds:
 - **Confidence below 0.70.** The low-confidence fallback and human review are the same queue.
 - **An outage signal:**
   - an outage keyword in the raw message ("outage", "is down", "it's down", "down for");
-  - the model reporting multiple users affected;
+  - the model reporting multiple users affected, on a Bug Report or Incident/Outage only (on a feature request or a question it describes who is asking, not an incident);
   - the category Incident/Outage, which always escalates, because an outage is urgent and a false alarm costs one review.
   
   The keyword check doesn't depend on the model, so it still works when the call fails.

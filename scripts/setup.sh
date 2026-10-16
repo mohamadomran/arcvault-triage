@@ -19,6 +19,18 @@ wait_for_n8n() {
   exit 1
 }
 
+# /healthz answers before the published workflow's webhook is registered. A GET to the webhook
+# returns n8n's "not registered for GET requests" only once the POST webhook exists, and it
+# starts no execution.
+wait_for_webhook() {
+  for _ in $(seq 1 60); do
+    curl -s http://localhost:5678/webhook/intake | grep -q "Did you mean to make a POST request" && return 0
+    sleep 2
+  done
+  echo "the intake webhook was not registered within 120 s; see: docker compose logs n8n" >&2
+  exit 1
+}
+
 # webhook.site mock for the queue POSTs: created once through its API, then kept in .env.
 if ! node -e 'process.loadEnvFile(".env"); process.exit(process.env.WEBHOOK_SITE_URL ? 0 : 1)'; then
   token=$(curl -sf -X POST -H "Accept: application/json" https://webhook.site/token)
@@ -40,4 +52,5 @@ $N8N publish:workflow --id="$WORKFLOW_ID"
 # The running server only picks up CLI changes after a restart.
 docker compose restart n8n
 wait_for_n8n
+wait_for_webhook
 echo "ready: POST http://localhost:5678/webhook/intake"

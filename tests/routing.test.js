@@ -195,11 +195,31 @@ describe("outage signals", () => {
     );
   });
 
-  test("multi_user_impact from the model escalates", () => {
-    assert.deepEqual(reasonsFor(llmOutput({ multiUser: true })), [
-      "multi_user_impact",
-    ]);
+  test("multi_user_impact from the model escalates a Bug Report", () => {
+    assert.deepEqual(
+      reasonsFor(llmOutput({ category: "Bug Report", multiUser: true })),
+      ["multi_user_impact"],
+    );
   });
+
+  for (const category of [
+    "Feature Request",
+    "Billing Issue",
+    "Technical Question",
+  ]) {
+    test(`multi_user_impact does not escalate a ${category}`, () => {
+      assert.deepEqual(
+        route(llmOutput({ category, multiUser: true }), QUIET),
+        {
+          routing: {
+            standard_queue: QUEUE_BY_CATEGORY[category],
+            destination_queue: QUEUE_BY_CATEGORY[category],
+          },
+          escalation: { flagged: false, reasons: [], billing_discrepancy: null },
+        },
+      );
+    });
+  }
 
   test("Incident/Outage escalates and keeps Engineering as the standard queue", () => {
     assert.deepEqual(route(llmOutput({ category: "Incident/Outage" }), QUIET), {

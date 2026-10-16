@@ -1,0 +1,41 @@
+{
+  "id": "x07",
+  "source": "Support Portal",
+  "received_at": "2026-10-16T12:33:07.171Z",
+  "message": "The PDF download link on the invoices page opens a blank tab. Also, while you're looking, can you confirm whether we're still on the annual plan?",
+  "classification": {
+    "rationale": "The message describes a broken feature (PDF download link) but does not indicate it affects multiple users or the entire service.",
+    "category": "Bug Report",
+    "priority": "Low",
+    "confidence": 0.85
+  },
+  "enrichment": {
+    "core_issue": "The customer reports that the PDF download link on the invoices page opens a blank tab.",
+    "identifiers": [],
+    "billing": {
+      "invoiced_amount": null,
+      "contract_amount": null,
+      "currency": null
+    },
+    "urgency": {
+      "evidence": [],
+      "level": "Low"
+    },
+    "multi_user_impact": false
+  },
+  "routing": {
+    "standard_queue": "Engineering",
+    "destination_queue": "Engineering"
+  },
+  "summary": "The customer reports that the PDF download link on the invoices page opens a blank tab. They also ask for confirmation about their annual plan status.",
+  "escalation": {
+    "flagged": false,
+    "reasons": [],
+    "billing_discrepancy": null
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T12:33:09.144Z",
+    "error": null
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "x02",
+  "source": "Support Portal",
+  "received_at": "2026-10-16T12:32:55.280Z",
+  "message": "We were billed $2,450 on invoice INV-3307, but our agreement says $1,800 per month. Please correct it before our finance team closes the quarter.",
+  "classification": {
+    "rationale": "The message discusses a billing discrepancy and requests a correction based on the agreement.",
+    "category": "Billing Issue",
+    "priority": "High",
+    "confidence": 0.95
+  },
+  "enrichment": {
+    "core_issue": "The customer reports a billing discrepancy regarding their invoice amount.",
+    "identifiers": [
+      {
+        "type": "invoice",
+        "value": "INV-3307"
+      }
+    ],
+    "billing": {
+      "invoiced_amount": 2450,
+      "contract_amount": 1800,
+      "currency": "USD"
+    },
+    "urgency": {
+      "evidence": [
+        "correct it before our finance team closes the quarter"
+      ],
+      "level": "High"
+    },
+    "multi_user_impact": false
+  },
+  "routing": {
+    "standard_queue": "Billing",
+    "destination_queue": "Escalation"
+  },
+  "summary": "The customer reports being billed $2,450 on invoice INV-3307, while their agreement states a monthly charge of $1,800. They request a correction before their finance team closes the quarter.",
+  "escalation": {
+    "flagged": true,
+    "reasons": [
+      "billing_discrepancy_over_500"
+    ],
+    "billing_discrepancy": 650
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T12:32:57.399Z",
+    "error": null
+  }
+}
