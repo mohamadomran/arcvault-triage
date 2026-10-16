@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ArcVault triage record",
+  "description": "One record per inbound message, with one section per spec step. The model returns $defs.llm (sent to OpenAI as a strict JSON schema, so it must stay self-contained: no $ref, every property required, additionalProperties false, and its property order is the order the model writes in). routing, escalation and meta are computed in code.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "source",
+    "received_at",
+    "message",
+    "classification",
+    "enrichment",
+    "routing",
+    "summary",
+    "escalation",
+    "meta"
+  ],
+  "properties": {
+    "id": {
+      "description": "Step 1, Ingestion: message id supplied by the caller.",
+      "type": ["integer", "string"]
+    },
+    "source": {
+      "description": "Step 1, Ingestion: channel the message arrived on.",
+      "type": "string",
+      "enum": ["Email", "Web Form", "Support Portal"]
+    },
+    "received_at": {
+      "description": "Step 1, Ingestion: when the webhook received the message.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "message": {
+      "description": "Step 1, Ingestion: the raw message, unchanged.",
+      "type": "string",
+      "minLength": 1
+    },
+    "classification": {
+      "description": "Step 2, Classification (LLM). Null only when the LLM call failed.",
+      "anyOf": [{ "$ref": "#/$defs/llm/properties/classification" }, { "type": "null" }]
+    },
+    "enrichment": {
+      "description": "Step 3, Enrichment (LLM). Null only when the LLM call failed.",
+      "anyOf": [{ "$ref": "#/$defs/llm/properties/enrichment" }, { "type": "null" }]
+    },
+    "routing": {
+      "description": "Step 4, Routing decision (code).",
+      "$ref": "#/$defs/routing"
+    },
+    "summary": {
+      "description": "Step 5, Human-readable summary (LLM). Null only when the LLM call failed.",
+      "anyOf": [{ "$ref": "#/$defs/llm/properties/summary" }, { "type": "null" }]
+    },
+    "escalation": {
+      "description": "Step 6, Human escalation flag (code).",
+      "$ref": "#/$defs/escalation"
+    },
+    "meta": {
+      "$ref": "#/$defs/meta"
+    }
+  },
+  "$defs": {
+    "llm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enrichment", "classification", "summary"],
+      "properties": {
+        "enrichment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["core_issue", "identifiers", "billing", "urgency", "multi_user_impact"],
+          "properties": {
+            "core_issue": { "type": "string" },
+            "identifiers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "value"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["account", "invoice", "error_code", "url", "other"]
+                  },
+                  "value": { "type": "string" }
+                }
+              }
+            },
+            "billing": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["invoiced_amount", "contract_amount", "currency"],
+              "properties": {
+                "invoiced_amount": { "type": ["number", "null"] },
+                "contract_amount": { "type": ["number", "null"] },
+                "currency": { "type": ["string", "null"] }
+              }
+            },
+            "urgency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["evidence", "level"],
+              "properties": {
+                "evidence": { "type": "array", "items": { "type": "string" } },
+                "level": { "type": "string", "enum": ["Low", "Medium", "High"] }
+              }
+            },
+            "multi_user_impact": { "type": "boolean" }
+          }
+        },
+        "classification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rationale", "category", "priority", "confidence"],
+          "properties": {
+            "rationale": { "type": "string" },
+            "category": {
+              "type": "string",
+              "enum": [
+                "Bug Report",
+                "Feature Request",
+                "Billing Issue",
+                "Technical Question",
+                "Incident/Outage"
+              ]
+            },
+            "priority": { "type": "string", "enum": ["Low", "Medium", "High"] },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "summary": { "type": "string" }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["standard_queue", "destination_queue"],
+      "properties": {
+        "standard_queue": {
+          "description": "Queue the category maps to; kept on escalated records so the reviewer knows where it would have gone. Null only when the LLM call failed.",
+          "anyOf": [
+            { "type": "string", "enum": ["Engineering", "Billing", "Product", "IT/Security"] },
+            { "type": "null" }
+          ]
+        },
+        "destination_queue": {
+          "description": "Where the record was sent: Escalation when escalation.flagged is true, otherwise standard_queue.",
+          "type": "string",
+          "enum": ["Engineering", "Billing", "Product", "IT/Security", "Escalation"]
+        }
+      }
+    },
+    "escalation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["flagged", "reasons", "billing_discrepancy"],
+      "properties": {
+        "flagged": {
+          "description": "True exactly when reasons is non-empty.",
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "low_confidence",
+              "outage_keyword",
+              "multi_user_impact",
+              "incident_category",
+              "billing_discrepancy_over_500",
+              "llm_error"
+            ]
+          }
+        },
+        "billing_discrepancy": {
+          "description": "enrichment.billing.invoiced_amount minus contract_amount, computed in code. Null when either amount is missing.",
+          "type": ["number", "null"]
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "processed_at", "error"],
+      "properties": {
+        "model": {
+          "description": "Model snapshot reported by the API, or the requested model if the call failed.",
+          "type": "string"
+        },
+        "processed_at": { "type": "string", "format": "date-time" },
+        "error": {
+          "description": "Why the LLM call failed; null when it succeeded.",
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}
