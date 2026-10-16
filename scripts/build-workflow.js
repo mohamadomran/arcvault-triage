@@ -10,6 +10,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const schema = JSON.parse(read("schema.json"));
 const prompt = read("prompts/triage.md");
 const routing = read("src/routing.js");
+const samples = [...JSON.parse(read("samples.json")), ...JSON.parse(read("samples-extra.json"))];
 
 // Fixed ids: re-importing replaces the same workflow, and the LLM node finds the imported credential.
 const WORKFLOW_ID = "arcvaultTriage01";
@@ -25,7 +26,12 @@ const N = {
   toFile: "Output · Record to JSON",
   write: "Output · Write record file",
   post: "Output · POST to queue",
+  responseBody: "Output · Response body",
   respond: "Output · Respond",
+  // Demo extras: a second entry point and a page that calls the webhook. No logic of their own.
+  form: "Step 1 · Form",
+  uiPage: "Demo · UI page",
+  uiServe: "Demo · Serve UI",
 };
 const ref = (name) => `$(${JSON.stringify(name)}).first().json`;
 
@@ -35,7 +41,12 @@ const ingestCode = `const SOURCES = ${JSON.stringify(schema.properties.source.en
 const SYSTEM_PROMPT = ${JSON.stringify(prompt)};
 const LLM_SCHEMA = ${JSON.stringify(schema.$defs.llm)};
 
-const { id, source, message } = $input.first().json.body ?? {};
+// The webhook sends a JSON body. The form trigger sends its fields by label and has no body.
+const input = $input.first().json;
+const fromForm = input.body === undefined;
+const { id, source, message } = fromForm
+  ? { id: "form-" + Date.now(), source: input.Source, message: input.Message }
+  : input.body ?? {};
 if (!(Number.isInteger(id) || (typeof id === "string" && /^[\\w-]+$/.test(id)))) {
   throw new Error('Body needs "id": an integer, or a string of letters, digits, "_" or "-".');
 }
@@ -58,8 +69,32 @@ const openai_request = {
     json_schema: { name: "triage", strict: true, schema: LLM_SCHEMA },
   },
 };
-return [{ json: { record: { id, source, received_at: new Date().toISOString(), message }, openai_request } }];
+return [{ json: { record: { id, source, received_at: new Date().toISOString(), message }, openai_request, entry: fromForm ? "form" : "webhook" } }];
 `;
+
+// The webhook caller gets the record. The form's completion page shows formSubmittedText as plain
+// text in one paragraph, where newlines collapse, so the fields are joined with " · ".
+const responseBodyCode = `const record = ${ref(N.route)};
+if (${ref(N.ingest)}.entry !== "form") return [{ json: record }];
+const c = record.classification;
+const fields = [
+  "Category: " + (c?.category ?? "none (the LLM call failed)"),
+  "Priority: " + (c?.priority ?? "none"),
+  "Confidence: " + (c?.confidence ?? "none"),
+  "Destination queue: " + record.routing.destination_queue,
+  "Reasons: " + (record.escalation.reasons.join(", ") || "none"),
+  "Summary: " + (record.summary ?? "none"),
+];
+return [{ json: { formSubmittedText: fields.join(" · ") } }];
+`;
+
+// The demo page, with the five samples and ten extras filled in. "<" is escaped so no message
+// can close the script tag that holds the list.
+const samplesTag = '<script type="application/json" id="samples">[]</script>';
+const uiTemplate = read("ui/index.html");
+if (uiTemplate.split(samplesTag).length !== 2) throw new Error("ui/index.html must contain the empty samples tag exactly once");
+const samplesJson = JSON.stringify(samples.map(({ id, source, message }) => ({ id, source, message }))).replace(/</g, "\\u003c");
+const uiHtml = uiTemplate.replace(samplesTag, `<script type="application/json" id="samples">${samplesJson}</script>`);
 
 // Steps 4 and 6: src/routing.js decides; this code only parses the model's reply and assembles
 // the record in schema order. A failed call, a refusal, a cut-off reply or content that isn't
@@ -202,18 +237,77 @@ const nodes = [
     onError: "continueErrorOutput",
   },
   {
+    id: "a1f0c001-0000-4000-8000-00000000000a",
+    name: N.responseBody,
+    type: "n8n-nodes-base.code",
+    typeVersion: 2,
+    position: [1540, 0],
+    parameters: { jsCode: responseBodyCode },
+  },
+  {
     id: "a1f0c001-0000-4000-8000-000000000008",
     name: N.respond,
     type: "n8n-nodes-base.respondToWebhook",
     typeVersion: 1.1,
-    position: [1540, 0],
-    parameters: { respondWith: "json", responseBody: `={{ ${ref(N.route)} }}`, options: {} },
+    position: [1760, 0],
+    parameters: { respondWith: "json", responseBody: "={{ $json }}", options: {} },
+  },
+  {
+    id: "a1f0c001-0000-4000-8000-00000000000b",
+    name: N.form,
+    type: "n8n-nodes-base.formTrigger",
+    typeVersion: 2.1,
+    position: [0, -200],
+    webhookId: "a1f0c001-0000-4000-8000-0000000000cc",
+    parameters: {
+      path: "triage-form",
+      formTitle: "ArcVault support request",
+      formDescription: "Triaged by the same pipeline as the intake webhook.",
+      formFields: {
+        values: [
+          {
+            fieldLabel: "Source",
+            fieldType: "dropdown",
+            fieldOptions: { values: schema.properties.source.enum.map((option) => ({ option })) },
+            defaultValue: "Web Form",
+            requiredField: true,
+          },
+          { fieldLabel: "Message", fieldType: "textarea", requiredField: true },
+        ],
+      },
+      responseMode: "responseNode",
+      options: {},
+    },
+  },
+  {
+    id: "a1f0c001-0000-4000-8000-00000000000c",
+    name: N.uiPage,
+    type: "n8n-nodes-base.webhook",
+    typeVersion: 2,
+    position: [0, 400],
+    webhookId: "a1f0c001-0000-4000-8000-0000000000dd",
+    parameters: { httpMethod: "GET", path: "ui", responseMode: "responseNode", options: {} },
+  },
+  {
+    id: "a1f0c001-0000-4000-8000-00000000000d",
+    name: N.uiServe,
+    type: "n8n-nodes-base.respondToWebhook",
+    typeVersion: 1.1,
+    position: [220, 400],
+    parameters: {
+      respondWith: "text",
+      responseBody: uiHtml,
+      options: {
+        responseHeaders: { entries: [{ name: "Content-Type", value: "text/html; charset=utf-8" }] },
+      },
+    },
   },
 ];
 
 const next = (name) => ({ main: [[{ node: name, type: "main", index: 0 }]] });
 const connections = {
   [N.webhook]: next(N.ingest),
+  [N.form]: next(N.ingest),
   [N.ingest]: next(N.triage),
   // Output 0 is the reply, output 1 the error after retries; both go to routing.
   [N.triage]: {
@@ -227,10 +321,12 @@ const connections = {
   [N.write]: next(N.post),
   [N.post]: {
     main: [
-      [{ node: N.respond, type: "main", index: 0 }],
-      [{ node: N.respond, type: "main", index: 0 }],
+      [{ node: N.responseBody, type: "main", index: 0 }],
+      [{ node: N.responseBody, type: "main", index: 0 }],
     ],
   },
+  [N.responseBody]: next(N.respond),
+  [N.uiPage]: next(N.uiServe),
 };
 
 // After a restart, n8n serves the previously published version for a few seconds before it

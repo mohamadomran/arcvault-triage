@@ -107,6 +107,13 @@ On the prompt as of change 3, gpt-4o passed 14 of 15 at $0.0054 per message, aga
 - Reviewer corrections fed back into the set.
 - Routing for the second topic of a multi-topic message.
 
+## Demo
+
+After setup, two more entry points feed the same Ingestion node; neither holds any logic:
+
+- `http://localhost:5678/webhook/ui`: a one-page demo. Load any of the 15 messages or type one, and it shows the returned record.
+- `http://localhost:5678/form/triage-form`: n8n's form trigger. The confirmation page shows the category, priority, confidence, queue, reasons and summary.
+
 ## Commands
 
 You need Docker, Node 22+, and a `.env` with `OPENAI_API_KEY=...`.

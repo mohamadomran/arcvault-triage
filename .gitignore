@@ -4,3 +4,6 @@ node_modules/
 *.log
 ASSESSMENT.md
 build/
+output/records/ui-*.json
+output/records/form-*.json
+output/records/demo-*.json

@@ -1,0 +1,159 @@
+<!doctype html>
+<!-- Demo page for the triage pipeline. n8n serves it at GET /webhook/ui; scripts/build-workflow.js
+     inlines this file and fills the samples list below. It holds no logic: it POSTs a message to
+     /webhook/intake and shows the record that comes back. Record data is untrusted (customer text
+     and model output), so it is only ever written with textContent, never innerHTML.
+     n8n serves webhook HTML in a CSP sandbox with an opaque origin, so the POST is cross-origin;
+     it works because the intake webhook allows any origin by default. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ArcVault triage demo</title>
+<style>
+  :root { --bg: #f6f7f9; --card: #fff; --text: #1d2330; --muted: #5d6675; --line: #dde1e7;
+          --accent: #2f5bd3; --esc: #b4232c; --ok: #1f7a43; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.lead { color: var(--muted); margin: 0 0 20px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  label { display: block; font-weight: 600; margin: 8px 0 4px; }
+  select, textarea { width: 100%; font: inherit; padding: 8px; border: 1px solid var(--line); border-radius: 6px; }
+  textarea { min-height: 110px; resize: vertical; }
+  button { font: inherit; cursor: pointer; border-radius: 6px; border: 1px solid var(--line); background: var(--card); padding: 4px 10px; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); padding: 8px 18px; margin-top: 12px; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .loads { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .error { color: var(--esc); font-weight: 600; }
+  dl { display: grid; grid-template-columns: 170px 1fr; gap: 6px 12px; margin: 0; }
+  dt { color: var(--muted); }
+  dd { margin: 0; overflow-wrap: anywhere; }
+  .badge { display: inline-block; padding: 1px 10px; border-radius: 999px; color: #fff; background: var(--ok); font-weight: 600; }
+  .badge.escalation { background: var(--esc); }
+  ul { margin: 0; padding-left: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>ArcVault intake and triage</h1>
+  <p class="lead">Sends a message to the n8n pipeline and shows the record it returns.</p>
+
+  <section>
+    <label for="source">Source</label>
+    <select id="source">
+      <option>Email</option>
+      <option selected>Web Form</option>
+      <option>Support Portal</option>
+    </select>
+    <label for="message">Message</label>
+    <textarea id="message" placeholder="Paste a customer message"></textarea>
+    <label>Load an example</label>
+    <div class="loads" id="loads"></div>
+    <button class="primary" id="triage">Triage</button>
+  </section>
+
+  <section id="result" hidden>
+    <p class="error" id="error" hidden></p>
+    <dl id="fields"></dl>
+  </section>
+</main>
+
+<!-- The five samples and ten extras; scripts/build-workflow.js replaces the empty list. -->
+<script type="application/json" id="samples">[]</script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const samples = JSON.parse($("samples").textContent);
+
+  for (const sample of samples) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = String(sample.id);
+    button.title = sample.message;
+    button.addEventListener("click", () => {
+      $("source").value = sample.source;
+      $("message").value = sample.message;
+    });
+    $("loads").append(button);
+  }
+
+  // Every value goes through textContent, so markup in a message or a model reply shows as text.
+  function text(value) {
+    const span = document.createElement("span");
+    span.textContent = value === null || value === undefined || value === "" ? "none" : String(value);
+    return span;
+  }
+  function list(items) {
+    if (!items || items.length === 0) return text("none");
+    const ul = document.createElement("ul");
+    for (const item of items) {
+      const li = document.createElement("li");
+      li.textContent = item;
+      ul.append(li);
+    }
+    return ul;
+  }
+  function badge(queue, escalated) {
+    const span = document.createElement("span");
+    span.className = escalated ? "badge escalation" : "badge";
+    span.textContent = queue;
+    return span;
+  }
+  function row(label, node, key) {
+    const dt = document.createElement("dt");
+    dt.textContent = label;
+    const dd = document.createElement("dd");
+    dd.dataset.field = key;
+    dd.append(node);
+    $("fields").append(dt, dd);
+  }
+
+  function render(record) {
+    $("fields").replaceChildren();
+    const c = record.classification, e = record.enrichment, esc = record.escalation;
+    row("Category", text(c?.category), "category");
+    row("Priority", text(c?.priority), "priority");
+    row("Confidence", text(c?.confidence), "confidence");
+    row("Destination queue", badge(record.routing.destination_queue, esc.flagged), "destination_queue");
+    if (esc.flagged) row("Standard queue", text(record.routing.standard_queue), "standard_queue");
+    row("Escalated", text(esc.flagged ? "yes" : "no"), "flagged");
+    row("Reasons", list(esc.reasons), "reasons");
+    row("Billing discrepancy", text(esc.billing_discrepancy), "billing_discrepancy");
+    row("Identifiers", list((e?.identifiers ?? []).map((i) => `${i.type}: ${i.value}`)), "identifiers");
+    row("Urgency evidence", list(e?.urgency.evidence), "urgency_evidence");
+    row("Summary", text(record.summary), "summary");
+    if (record.meta.error) row("Error", text(record.meta.error), "error");
+  }
+
+  function showError(message) {
+    $("fields").replaceChildren();
+    $("error").textContent = message;
+    $("error").hidden = false;
+    $("result").hidden = false;
+  }
+
+  $("triage").addEventListener("click", async () => {
+    const message = $("message").value;
+    if (message.trim() === "") return showError("Enter a message first.");
+    $("triage").disabled = true;
+    $("error").hidden = true;
+    try {
+      const res = await fetch("/webhook/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: `ui-${Date.now()}`, source: $("source").value, message }),
+      });
+      const body = await res.text();
+      if (!res.ok) return showError(`The pipeline answered HTTP ${res.status}: ${body.slice(0, 300)}`);
+      render(JSON.parse(body));
+      $("result").hidden = false;
+    } catch (err) {
+      showError(`Could not reach the pipeline: ${err.message}`);
+    } finally {
+      $("triage").disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

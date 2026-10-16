@@ -77,3 +77,7 @@ Decisions I have approved, and why. Newest at the bottom.
   - **Low**: feature requests with no stated impact, general questions and off-topic messages.
 - **Urgency doesn't set priority.** Urgency stays a reading of the message's wording; the prompt now says so, and I dropped "the impact is financial" from urgency's Medium level, because under my policy a billing mismatch is a priority call, not an urgency one.
 - **I kept the policy because routing didn't move.** On all 15 messages, no category, queue or escalation reason changed. That was the condition, since priority doesn't feed routing.
+
+## Demo extras
+
+- I added n8n's form trigger (the spec lists form submission as a trigger, and Web Form is a source) and a one-page demo UI served by n8n, after the pipeline was done, as demo extras. They contain no logic: routing stays in `src/routing.js`.
