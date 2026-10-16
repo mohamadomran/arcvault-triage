@@ -27,7 +27,9 @@ The pipeline makes one LLM call per message. That call covers spec Steps 2, 3 an
 
 **Extract, then classify, then summarize.** The model writes fields in schema order, so `$defs.llm` puts `enrichment` first. The model commits to the facts (core issue, identifiers, multi-user impact) before it picks a category, and writes the summary last from both. Inside `classification`, `rationale` comes before `category` for the same reason. The label is chosen after the evidence is written down, and a human reviewer can see why it was chosen.
 
-**Definitions and tie-breakers, no examples.** The five categories overlap in predictable places: one user's error vs. an outage, and "is there a way to" vs. "please add". Each of those boundaries has an explicit rule. I used no few-shot examples. The boundary rules, though, were written knowing the five samples, so passing them shows the rules behave as intended, not that the prompt generalizes. Measuring that needs a labeled set written separately from the prompt (see "What I would change with more time").
+**Definitions, tie-breakers and three boundary examples.** The five categories overlap in predictable places: one user's error vs. an outage, and "is there a way to" vs. "please add". Each of those boundaries has an explicit rule. The rules alone didn't hold on the outage boundary: one user's 403 still came back as Incident/Outage. So that tie-breaker now says to classify by the scope the message states, not by the type of error, and gives three short examples: one user's 503 (Bug Report), many support agents locked out (Incident/Outage), and a service-wide degradation (Incident/Outage). I wrote the examples myself, and none of them is a sample or an extra test message. That avoids the problem with few-shot examples copied from test cases, where the test only checks that the model can recall them. The rules were still written knowing the five samples, so the 10 extra messages in `samples-extra.json`, written with their intended outcomes before any run, are the fairer check.
+
+**Multi-user impact scoped to a reported problem.** `multi_user_impact` is true only when a problem the message reports affects several users now. Describing the organization ("we're a compliance-heavy org", "all our users would benefit") doesn't count, and it is false for requests and questions. Without that scope, the model set it on a feature request and on a billing question. Routing now also counts the flag only on a Bug Report or an Incident/Outage, so the prompt rule and the code rule back each other up.
 
 **Confidence with anchors.** Self-reported confidence is poorly calibrated and tends to bunch up around 0.9. The prompt ties each score band to a concrete situation. It also says a low score is the right outcome when unsure, so the model has no reason to round up. It is still the model's own estimate, not a measured probability, and it is the weakest signal in the record.
 
@@ -37,6 +39,6 @@ The pipeline makes one LLM call per message. That call covers spec Steps 2, 3 an
 
 ## What I would change with more time
 
-- Build a larger labeled set (multi-topic, vague, non-English and adversarial messages), measure the prompt against it, and draw few-shot examples from that set rather than from the test samples.
+- Grow the 10 extra messages into a labeled set of a few hundred (multi-topic, vague, non-English and adversarial), written by someone other than the prompt's author, and measure every prompt change against it.
 - Derive confidence from the token log-probabilities of the category instead of asking the model for a number.
 - Version the prompt and record the version in each record's `meta`, so any output can be traced back to the prompt that produced it.
