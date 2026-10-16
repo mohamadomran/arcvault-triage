@@ -30,7 +30,7 @@ Technical questions go to IT/Security because the realistic ones are about setup
 
 A record goes to Escalation if any of these holds:
 
-- **Confidence is below 0.70, or the model marks the message as not actionable** (off-topic, or too vague to tell what is wrong). Together these are the low-confidence fallback. The second rule exists because self-reported confidence never dropped below 0.85, even on vague and off-topic messages.
+- **Confidence is below 0.70, or the model marks the message as not actionable** (off-topic, or too vague to tell what is wrong). Together these are the low-confidence fallback. The second rule exists because self-reported confidence never dropped below 0.70 in any run, even on vague and off-topic messages.
 - **There is an outage signal:**
   - an outage keyword in the raw message ("outage", "is down", "down for");
   - multiple users affected, counted only on a Bug Report or Incident/Outage;
