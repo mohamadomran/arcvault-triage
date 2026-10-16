@@ -47,7 +47,7 @@ You write the fields in schema order, so finish each section before starting the
   - **Billing Issue**: invoices, charges, payments, pricing, refunds or contract rates.
   - **Technical Question**: asks how to do something or whether something is possible (setup, configuration, integrations, API use), with nothing reported broken.
 - Tie-breakers:
-  - Bug Report vs Incident/Outage: one user's error is a Bug Report. It is Incident/Outage only when the service is down or multiple users are affected.
+  - Bug Report vs Incident/Outage: one user's error is a Bug Report. It is Incident/Outage only when the service is down or multiple users are affected. Classify by the scope the message states, not by the type of error.
   - Technical Question vs Feature Request: "is there a way to..." or "how do I..." is a Technical Question; "we'd like you to add..." is a Feature Request.
   - Several topics in one message: choose the one that needs action first, and lower `confidence`.
 - `priority`:

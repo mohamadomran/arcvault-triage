@@ -1,0 +1,235 @@
+[
+  {
+    "id": 1,
+    "source": "Email",
+    "received_at": "2026-10-16T12:00:59.751Z",
+    "message": "Hi, I tried logging in this morning and keep getting a 403 error. My account is arcvault.io/user/jsmith. This started after your update last Tuesday.",
+    "classification": {
+      "rationale": "The message describes a 403 error when logging in, indicating a potential outage for the user.",
+      "category": "Incident/Outage",
+      "priority": "High",
+      "confidence": 0.9
+    },
+    "enrichment": {
+      "core_issue": "The customer is experiencing a 403 error when trying to log in.",
+      "identifiers": [
+        {
+          "type": "account",
+          "value": "arcvault.io/user/jsmith"
+        },
+        {
+          "type": "error_code",
+          "value": "403"
+        }
+      ],
+      "billing": {
+        "invoiced_amount": null,
+        "contract_amount": null,
+        "currency": null
+      },
+      "urgency": {
+        "evidence": [
+          "keep getting a 403 error",
+          "This started after your update last Tuesday"
+        ],
+        "level": "High"
+      },
+      "multi_user_impact": false
+    },
+    "routing": {
+      "standard_queue": "Engineering",
+      "destination_queue": "Escalation"
+    },
+    "summary": "The customer reports receiving a 403 error when attempting to log in to their account at arcvault.io/user/jsmith. This issue began after a recent update last Tuesday, indicating a potential incident affecting their access.",
+    "escalation": {
+      "flagged": true,
+      "reasons": [
+        "incident_category"
+      ],
+      "billing_discrepancy": null
+    },
+    "meta": {
+      "model": "gpt-4o-mini-2024-07-18",
+      "processed_at": "2026-10-16T12:01:02.448Z",
+      "error": null
+    }
+  },
+  {
+    "id": 2,
+    "source": "Web Form",
+    "received_at": "2026-10-16T12:01:02.783Z",
+    "message": "We'd love to see a bulk export feature for our audit logs. We're a compliance-heavy org and this would save us hours every month.",
+    "classification": {
+      "rationale": "The message expresses a desire for a new feature to improve efficiency for a compliance-heavy organization.",
+      "category": "Feature Request",
+      "priority": "Low",
+      "confidence": 0.9
+    },
+    "enrichment": {
+      "core_issue": "The customer requests a bulk export feature for audit logs.",
+      "identifiers": [],
+      "billing": {
+        "invoiced_amount": null,
+        "contract_amount": null,
+        "currency": null
+      },
+      "urgency": {
+        "evidence": [],
+        "level": "Low"
+      },
+      "multi_user_impact": true
+    },
+    "routing": {
+      "standard_queue": "Product",
+      "destination_queue": "Escalation"
+    },
+    "summary": "The customer is requesting a bulk export feature for audit logs to save time in their compliance-heavy organization. This request indicates that multiple users would benefit from this feature.",
+    "escalation": {
+      "flagged": true,
+      "reasons": [
+        "multi_user_impact"
+      ],
+      "billing_discrepancy": null
+    },
+    "meta": {
+      "model": "gpt-4o-mini-2024-07-18",
+      "processed_at": "2026-10-16T12:01:04.584Z",
+      "error": null
+    }
+  },
+  {
+    "id": 3,
+    "source": "Support Portal",
+    "received_at": "2026-10-16T12:01:04.870Z",
+    "message": "Invoice #8821 shows a charge of $1,240 but our contract rate is $980/month. Can someone look into this?",
+    "classification": {
+      "rationale": "The message discusses an invoice discrepancy, indicating a billing issue.",
+      "category": "Billing Issue",
+      "priority": "Medium",
+      "confidence": 0.9
+    },
+    "enrichment": {
+      "core_issue": "The customer reports a discrepancy between the invoiced amount and the contract rate.",
+      "identifiers": [
+        {
+          "type": "invoice",
+          "value": "8821"
+        }
+      ],
+      "billing": {
+        "invoiced_amount": 1240,
+        "contract_amount": 980,
+        "currency": "USD"
+      },
+      "urgency": {
+        "evidence": [],
+        "level": "Medium"
+      },
+      "multi_user_impact": false
+    },
+    "routing": {
+      "standard_queue": "Billing",
+      "destination_queue": "Billing"
+    },
+    "summary": "The customer reports that Invoice #8821 shows a charge of $1,240, while their contract rate is $980/month. They are requesting assistance to look into this discrepancy.",
+    "escalation": {
+      "flagged": false,
+      "reasons": [],
+      "billing_discrepancy": 260
+    },
+    "meta": {
+      "model": "gpt-4o-mini-2024-07-18",
+      "processed_at": "2026-10-16T12:01:06.884Z",
+      "error": null
+    }
+  },
+  {
+    "id": 4,
+    "source": "Email",
+    "received_at": "2026-10-16T12:01:07.170Z",
+    "message": "I'm not sure if this is the right place to ask, but is there a way to set up SSO with Okta? We're evaluating switching our auth provider.",
+    "classification": {
+      "rationale": "The message asks if there is a way to set up SSO with Okta, indicating a technical inquiry.",
+      "category": "Technical Question",
+      "priority": "Low",
+      "confidence": 0.95
+    },
+    "enrichment": {
+      "core_issue": "The customer is asking about setting up SSO with Okta.",
+      "identifiers": [],
+      "billing": {
+        "invoiced_amount": null,
+        "contract_amount": null,
+        "currency": null
+      },
+      "urgency": {
+        "evidence": [],
+        "level": "Low"
+      },
+      "multi_user_impact": false
+    },
+    "routing": {
+      "standard_queue": "IT/Security",
+      "destination_queue": "IT/Security"
+    },
+    "summary": "The customer is inquiring about the possibility of setting up SSO with Okta as they are evaluating switching their authentication provider.",
+    "escalation": {
+      "flagged": false,
+      "reasons": [],
+      "billing_discrepancy": null
+    },
+    "meta": {
+      "model": "gpt-4o-mini-2024-07-18",
+      "processed_at": "2026-10-16T12:01:09.435Z",
+      "error": null
+    }
+  },
+  {
+    "id": 5,
+    "source": "Web Form",
+    "received_at": "2026-10-16T12:01:09.735Z",
+    "message": "Your dashboard stopped loading for us around 2pm EST. Checked our end — it's definitely on yours. Multiple users affected.",
+    "classification": {
+      "rationale": "The message states that the dashboard is not loading and multiple users are affected, indicating a service outage.",
+      "category": "Incident/Outage",
+      "priority": "High",
+      "confidence": 0.95
+    },
+    "enrichment": {
+      "core_issue": "The customer reports that their dashboard stopped loading.",
+      "identifiers": [],
+      "billing": {
+        "invoiced_amount": null,
+        "contract_amount": null,
+        "currency": null
+      },
+      "urgency": {
+        "evidence": [
+          "stopped loading for us around 2pm EST",
+          "it's definitely on yours",
+          "Multiple users affected"
+        ],
+        "level": "High"
+      },
+      "multi_user_impact": true
+    },
+    "routing": {
+      "standard_queue": "Engineering",
+      "destination_queue": "Escalation"
+    },
+    "summary": "The customer reports that their dashboard stopped loading around 2pm EST, affecting multiple users. They have confirmed the issue is on the service provider's end.",
+    "escalation": {
+      "flagged": true,
+      "reasons": [
+        "multi_user_impact",
+        "incident_category"
+      ],
+      "billing_discrepancy": null
+    },
+    "meta": {
+      "model": "gpt-4o-mini-2024-07-18",
+      "processed_at": "2026-10-16T12:01:11.962Z",
+      "error": null
+    }
+  }
+]

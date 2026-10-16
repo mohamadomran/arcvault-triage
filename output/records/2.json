@@ -1,0 +1,43 @@
+{
+  "id": 2,
+  "source": "Web Form",
+  "received_at": "2026-10-16T12:01:02.783Z",
+  "message": "We'd love to see a bulk export feature for our audit logs. We're a compliance-heavy org and this would save us hours every month.",
+  "classification": {
+    "rationale": "The message expresses a desire for a new feature to improve efficiency for a compliance-heavy organization.",
+    "category": "Feature Request",
+    "priority": "Low",
+    "confidence": 0.9
+  },
+  "enrichment": {
+    "core_issue": "The customer requests a bulk export feature for audit logs.",
+    "identifiers": [],
+    "billing": {
+      "invoiced_amount": null,
+      "contract_amount": null,
+      "currency": null
+    },
+    "urgency": {
+      "evidence": [],
+      "level": "Low"
+    },
+    "multi_user_impact": true
+  },
+  "routing": {
+    "standard_queue": "Product",
+    "destination_queue": "Escalation"
+  },
+  "summary": "The customer is requesting a bulk export feature for audit logs to save time in their compliance-heavy organization. This request indicates that multiple users would benefit from this feature.",
+  "escalation": {
+    "flagged": true,
+    "reasons": [
+      "multi_user_impact"
+    ],
+    "billing_discrepancy": null
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T12:01:04.584Z",
+    "error": null
+  }
+}

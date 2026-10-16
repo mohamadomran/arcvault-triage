@@ -1,0 +1,41 @@
+{
+  "id": 4,
+  "source": "Email",
+  "received_at": "2026-10-16T12:01:07.170Z",
+  "message": "I'm not sure if this is the right place to ask, but is there a way to set up SSO with Okta? We're evaluating switching our auth provider.",
+  "classification": {
+    "rationale": "The message asks if there is a way to set up SSO with Okta, indicating a technical inquiry.",
+    "category": "Technical Question",
+    "priority": "Low",
+    "confidence": 0.95
+  },
+  "enrichment": {
+    "core_issue": "The customer is asking about setting up SSO with Okta.",
+    "identifiers": [],
+    "billing": {
+      "invoiced_amount": null,
+      "contract_amount": null,
+      "currency": null
+    },
+    "urgency": {
+      "evidence": [],
+      "level": "Low"
+    },
+    "multi_user_impact": false
+  },
+  "routing": {
+    "standard_queue": "IT/Security",
+    "destination_queue": "IT/Security"
+  },
+  "summary": "The customer is inquiring about the possibility of setting up SSO with Okta as they are evaluating switching their authentication provider.",
+  "escalation": {
+    "flagged": false,
+    "reasons": [],
+    "billing_discrepancy": null
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T12:01:09.435Z",
+    "error": null
+  }
+}

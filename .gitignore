@@ -3,3 +3,4 @@ node_modules/
 .n8n/
 *.log
 ASSESSMENT.md
+build/

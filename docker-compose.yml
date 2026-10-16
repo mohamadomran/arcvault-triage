@@ -1,0 +1,19 @@
+services:
+  n8n:
+    # Pinned: the "stable" tag moves, and the workflow and CLI commands were checked against this version.
+    image: n8nio/n8n:2.43.7
+    ports:
+      - "5678:5678"
+    environment:
+      # Read/Write Files nodes may only touch /files (n8n 2.x restricts file access by default).
+      N8N_RESTRICT_FILE_ACCESS_TO: /files
+      # n8n 2.x blocks $env in nodes by default; the POST node reads WEBHOOK_SITE_URL from it.
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      # The only value taken from .env. No env_file, so the OpenAI key never enters the container environment.
+      WEBHOOK_SITE_URL: ${WEBHOOK_SITE_URL}
+    volumes:
+      # n8n's database, encryption key and imported credential survive `docker compose down`.
+      - ./.n8n:/home/node/.n8n
+      - ./output:/files/output
+      # Import files only: build/ is gitignored and setup.sh deletes the credential file after import.
+      - ./build:/import:ro

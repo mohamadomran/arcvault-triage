@@ -1,0 +1,50 @@
+{
+  "id": "smoke-saml",
+  "source": "Email",
+  "received_at": "2026-10-16T11:26:39.568Z",
+  "message": "Our SAML login page shows error 502 since this morning for my account",
+  "classification": {
+    "rationale": "The message indicates a 502 error on the SAML login page, suggesting a service issue.",
+    "category": "Incident/Outage",
+    "priority": "High",
+    "confidence": 0.9
+  },
+  "enrichment": {
+    "core_issue": "The customer reports a 502 error on the SAML login page.",
+    "identifiers": [
+      {
+        "type": "error_code",
+        "value": "502"
+      }
+    ],
+    "billing": {
+      "invoiced_amount": null,
+      "contract_amount": null,
+      "currency": null
+    },
+    "urgency": {
+      "evidence": [
+        "shows error 502 since this morning"
+      ],
+      "level": "High"
+    },
+    "multi_user_impact": false
+  },
+  "routing": {
+    "standard_queue": "Engineering",
+    "destination_queue": "Escalation"
+  },
+  "summary": "The customer reports a 502 error on the SAML login page since this morning. This issue is likely impacting their ability to log in.",
+  "escalation": {
+    "flagged": true,
+    "reasons": [
+      "incident_category"
+    ],
+    "billing_discrepancy": null
+  },
+  "meta": {
+    "model": "gpt-4o-mini-2024-07-18",
+    "processed_at": "2026-10-16T11:26:41.654Z",
+    "error": null
+  }
+}
