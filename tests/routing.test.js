@@ -188,6 +188,13 @@ describe("outage signals", () => {
     assert.deepEqual(reasonsFor(llmOutput(), message), []);
   });
 
+  test("keyword ignores 'drop-down for'", () => {
+    assert.deepEqual(
+      reasonsFor(llmOutput(), "Can you add a drop-down for this?"),
+      [],
+    );
+  });
+
   test("multi_user_impact from the model escalates", () => {
     assert.deepEqual(reasonsFor(llmOutput({ multiUser: true })), [
       "multi_user_impact",

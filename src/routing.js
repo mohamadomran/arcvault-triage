@@ -21,7 +21,7 @@ const OUTAGE_PATTERN = new RegExp(
     /\boutages?\b/, // "outage(s)": the spec's own example
     /\b(?:is|are|was|were|went|been)\s+down\b/, // "the portal is down", "it went down"
     /\w['’]s\s+down\b/, // "it's down" / "it’s down": straight or curly apostrophe
-    /\bdown\s+for\b/, // "down for all users": the spec's other example
+    /(?<![\w-])down\s+for\b/, // "down for all users": the spec's other example; not "drop-down for"
   ]
     .map((part) => part.source)
     .join("|"),

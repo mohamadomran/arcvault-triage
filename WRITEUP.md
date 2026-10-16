@@ -50,7 +50,7 @@ Every rule that fires is listed in `escalation.reasons`.
 
 ## Results on the five samples
 
-The records are in `output/records.json`, one file each in `output/records/`, and all validate against `schema.json`. The run took about 2.8 seconds per message. I didn't write expected outcomes independently of the prompt, so I didn't run the end-to-end comparison (`tests/e2e/pipeline.test.js`). The verdicts below are against the prompt's own rules.
+The records are in `output/records.json`, one file each in `output/records/`. The run took about 2.8 seconds per message. I didn't write expected outcomes independently of the prompt, so I didn't run the end-to-end comparison (`tests/e2e/pipeline.test.js`). The verdicts below are against the prompt's own rules.
 
 | # | Category (confidence) | Priority | Queue | Reasons | Verdict |
 |---|---|---|---|---|---|
