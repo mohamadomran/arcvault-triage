@@ -1,131 +1,84 @@
 # ArcVault intake and triage: write-up
 
-An n8n workflow takes an inbound message. One LLM call classifies it, extracts its details and summarizes it, and plain code routes and escalates it. The spec isn't in this repo because it is marked confidential. I'm happy to run the workflow live in the interview.
+An n8n workflow triages inbound messages: one LLM call classifies, enriches and summarizes each one, and plain code routes and escalates it. The spec is marked confidential, so it isn't in this repo; I'm happy to run the workflow live in the interview. `PROMPTS.md` explains the prompt, `DECISIONS.md` gives each rule's details and reasons, and `AI-LOG.md` records what the AI assistant and the model got wrong.
 
 ## System design
 
-A POST to `/webhook/intake` with `id`, `source` and `message` runs these nodes, named after the spec's steps:
+A POST to `/webhook/intake` with `id`, `source` and `message` runs nodes named after the spec's steps:
 
 1. **Step 1 · Ingestion** checks the input.
-2. **Steps 2, 3, 5 · Triage (LLM)** makes one gpt-4o-mini call with a strict JSON schema: enrichment first, then classification, then summary, so the model writes the facts down before it picks a label.
-3. **Steps 4, 6 · Routing and escalation** runs `src/routing.js`. The model never routes.
-4. **Output** writes `output/records/<id>.json`, POSTs the record to webhook.site with `?queue=<destination>`, and returns it.
+2. **Steps 2, 3, 5 · Triage (LLM)**: one gpt-4o-mini call with a strict JSON schema.
+3. **Steps 4, 6 · Routing and escalation** runs `src/routing.js`; the model never routes.
+4. **Output** writes `output/records/<id>.json`, POSTs it to webhook.site with `?queue=<destination>` and returns it.
 
-n8n keeps the workflow, the encrypted credential and its execution history in `./.n8n`. There is no other database. The logic lives in `prompts/triage.md`, `schema.json`, `src/routing.js` and `src/record.js` (record assembly), and `scripts/build-workflow.js` generates `workflow.json` from them.
+`scripts/build-workflow.js` generates `workflow.json` from the logic in `prompts/triage.md`, `schema.json`, `src/routing.js` and `src/record.js` (record assembly). n8n keeps the workflow, encrypted credential and execution history in `./.n8n`; there is no other database. gpt-4o-mini at temperature 0 costs about $0.0003 per message and answers in 2–4 seconds.
 
-**Model:** gpt-4o-mini at temperature 0. It supports strict JSON-schema output, costs about $0.0003 per message and answers in 2–4 seconds. On an earlier prompt gpt-4o scored higher, at about 17 times the cost; the final gpt-4o-mini prompt matches that score (see Results).
+## Routing and escalation
 
-## Routing
+Bug Reports and Incident/Outages go to Engineering, Feature Requests to Product, Billing Issues to Billing, and Technical Questions to IT/Security, because realistic ones concern setup and integration (sample 4's Okta SSO) and no other queue fits a how-to question.
 
-| Category | Queue |
-|---|---|
-| Bug Report, Incident/Outage | Engineering (Incident/Outage always escalates) |
-| Feature Request | Product |
-| Billing Issue | Billing |
-| Technical Question | IT/Security |
-
-Technical questions go to IT/Security because the realistic ones are about setup and integration, like sample 4's SSO with Okta, and no other queue fits a how-to question. An escalated record keeps its `standard_queue`, so the reviewer sees where it would have gone.
-
-## Escalation
-
-A record goes to Escalation if any of these holds:
-
-- **Confidence is below 0.70, or the model marks the message as not actionable** (off-topic, or too vague to tell what is wrong). Together these are the low-confidence fallback. The second rule exists because self-reported confidence never dropped below 0.70 in any run, even on vague and off-topic messages.
-- **There is an outage signal:**
-  - an outage keyword in the raw message ("outage", "is down", "down for");
-  - multiple users affected, counted only on a Bug Report or Incident/Outage;
-  - the category Incident/Outage. A false alarm costs one review; a missed outage costs far more.
-- **The billing discrepancy is over $500:** invoiced minus contract amount. The size of the error is what makes a billing issue risky, not the invoice total. Sample 3 is $1,240 − $980 = $260, so it goes to Billing unescalated.
-- **The LLM call failed:** after 3 retries, or on a refusal or an unparseable reply. That gives `llm_error`, and the record is escalated, not dropped.
+A record goes to Escalation instead, keeping its `standard_queue`, on low confidence (below 0.70, or marked not actionable), an outage signal (an outage keyword, multi-user impact on a problem report, or the category Incident/Outage), a billing discrepancy over $500 (invoiced minus contract, so sample 3's $260 isn't escalated), or a failed LLM call (`llm_error`).
 
 ## Results
 
-I ran the five samples and 10 extra messages through the live workflow. I wrote the extras (`samples-extra.json`) with intended outcomes and committed them before any run. After x01 and x10 failed at baseline, I added the `actionable` rule and changed their intended reason from `low_confidence` to `not_actionable` before rerunning. I wrote my expected outcomes for the five samples (`tests/expected.json`) after the first run, so I had seen the outputs. The table scores category, queue and reasons.
+I ran the five samples and 10 extras live. I committed the extras (`samples-extra.json`) with intended outcomes before any run, but wrote my expectations for the samples (`tests/expected.json`) after seeing the first run's outputs. Scoring category, queue and reasons, the baseline passed 8 of 15 (samples 3 of 5):
 
-| # | Intended | Baseline | Final |
-|---|---|---|---|
-| 1 | Bug Report → Engineering | Incident/Outage → Escalation ✗ | ✓ |
-| 2 | Feature Request → Product | Escalation (multi-user) ✗ | ✓ |
-| 3 | Billing Issue → Billing | ✓ | ✓ |
-| 4 | Technical Question → IT/Security | ✓ | ✓ |
-| 5 | Incident/Outage → Escalation | ✓ | ✓ |
-| x01 vague | Escalation (not actionable) | Bug Report → Engineering ✗ | ✓ |
-| x02 $650 overcharge | Billing Issue → Escalation | extra multi-user reason ✗ | ✓ |
-| x03 one user's 504 | Bug Report → Engineering | ✓ | ✓ |
-| x04 whole app down | Incident/Outage → Escalation | ✓ | ✓ |
-| x05 "drop-down for" | Feature Request → Product | ✓ | ✓ |
-| x06 "all our users" | Feature Request → Product | Escalation (multi-user) ✗ | ✓ |
-| x07 bug plus billing question | Bug Report → Engineering | ✓ | ✓ |
-| x08 injection; one user can't sign in | Bug Report, High → Engineering | Incident/Outage ✗ | Incident/Outage ✗ (priority stayed High) |
-| x09 Spanish bug report | Bug Report → Engineering | ✓ | ✓ |
-| x10 off-topic | Escalation (not actionable) | Technical Question → IT/Security ✗ | ✓ |
-| **Total** | | **8/15** (samples 3/5) | **14/15** (samples 5/5) |
+| # | Intended | Baseline |
+|---|---|---|
+| 1 | Bug Report → Engineering | Incident/Outage → Escalation ✗ |
+| 2 | Feature Request → Product | Escalation (multi-user) ✗ |
+| 3 | Billing Issue → Billing | ✓ |
+| 4 | Technical Question → IT/Security | ✓ |
+| 5 | Incident/Outage → Escalation | ✓ |
+| x01 vague | Escalation (not actionable) | Bug Report → Engineering ✗ |
+| x02 $650 overcharge | Billing Issue → Escalation | extra multi-user reason ✗ |
+| x03 one user's 504 | Bug Report → Engineering | ✓ |
+| x04 whole app down | Incident/Outage → Escalation | ✓ |
+| x05 "drop-down for" | Feature Request → Product | ✓ |
+| x06 "all our users" | Feature Request → Product | Escalation (multi-user) ✗ |
+| x07 bug plus billing question | Bug Report → Engineering | ✓ |
+| x08 injection; one user can't sign in | Bug Report, High → Engineering | Incident/Outage ✗ |
+| x09 Spanish bug report | Bug Report → Engineering | ✓ |
+| x10 off-topic | Escalation (not actionable) | Technical Question → IT/Security ✗ |
 
-I made four changes, and kept each only if nothing that had passed before then failed:
+Four changes (`DECISIONS.md`) raised the score: multi-user routing only on problem reports (11), the prompt's multi-user scope (11), three self-written outage-boundary examples (12, fixing sample 1 and my made-up 502 message), and the `actionable` flag (14 of 15, samples 5 of 5). Only x08 still misses (Incident/Outage; priority stayed High). After change 3, gpt-4o passed 14 at $0.0054 per message and gpt-4o-mini 12 at $0.0003; I didn't rerun gpt-4o after change 4.
 
-1. Routing counts multi-user only on problem reports: 8 to 11.
-2. The prompt limits multi-user impact to a reported problem affecting users now: 11.
-3. Three self-written examples on the outage boundary: 12. This fixed sample 1, and my made-up 502 message is now a Bug Report too.
-4. An `actionable` flag escalates vague and off-topic messages: 14. For x01 and x10 I changed the intended reason from `low_confidence` to `not_actionable` before this run.
+**Priority.** The end-to-end test first passed 2 of 5 samples, with 2, 3 and 4 off on priority only, then 3 of 5 under my policy (`DECISIONS.md`). Sample 3 (invoice above the contract rate) stays Medium, not High, and sample 4 (SSO evaluation question) Low, not Medium. A demo invoice with a $1,100 gap came back High: a hint, not proof, that gap size matters.
 
-On the prompt as of change 3, gpt-4o passed 14 of 15 at $0.0054 per message, against gpt-4o-mini's 12 of 15 at $0.0003. With change 4, gpt-4o-mini reaches 14 of 15 at a seventeenth of the cost. I didn't rerun gpt-4o on the final prompt.
-
-**Priority.** Against my expectations, the end-to-end test first passed 2 of the 5 samples, with samples 2, 3 and 4 off on priority only. I then replaced the prompt's priority rules with my policy (see `DECISIONS.md`): 3 of 5. Sample 3 (an invoice above the contract rate) is still Medium where I expect High, and sample 4 (an SSO evaluation question) is still Low where I expect Medium. It isn't urgency: in the final run sample 3's urgency is Low and its priority Medium. A demo invoice with a $1,100 gap came back High, so the model may weigh the size of the gap, but two cases don't show that. No category, queue or reason changed on any of the 15 messages.
-
-**Consistency.** I ran all 15 messages three more times on the final workflow (temperature 0, the same model snapshot) and committed the third run. 12 of 15 messages gave the same category, priority, queue and reasons in all three runs. Three didn't. x01 was marked actionable and went to Engineering in runs 1 and 2, and only run 3 escalated it as not actionable (a fresh-clone run also sent it to Engineering). x08 was a Bug Report for Engineering in runs 1 and 2 and Incident/Outage for Escalation in run 3. x06's priority was Low once and Medium twice. Each run scored 14 of 15 in the table above, but the miss moved between x01 and x08, so the Final column is one draw. Confidence varied only on x01 (0.70–0.85) and x06 (0.85–0.95), and summary wording varied on 10 of the 15 messages.
+**Consistency.** Three more runs of all 15 on the final workflow (temperature 0, same model snapshot), the third committed: 12 matched on category, priority, queue and reasons every time. x01 was escalated only in run 3; runs 1 and 2 and a fresh-clone run sent it to Engineering as actionable. x08 was a Bug Report for Engineering in runs 1 and 2, escalated in run 3. x06's priority was Low once, Medium twice. Each run scored 14 of 15, but the miss moved between x01 and x08: the final score is one draw. Confidence varied only on x01 (0.70–0.85) and x06 (0.85–0.95); summary wording on 10 messages.
 
 ## Known weaknesses
 
-- **Both safety nets are the model's own judgment.** Confidence is self-reported, and so is `actionable`, which missed the vague x01 in two of three runs.
-- **The outage boundary still leaks** (x08, in one of three runs), which costs an unneeded escalation.
-- **Priority misses my policy on samples 3 and 4,** and I don't know why.
-- **The tests are small and mine.** The rules were written knowing the samples.
-- **There is one category per message.** x07's billing question isn't routed.
-- **The webhooks have no authentication and accept any origin.** That is fine locally, where n8n listens on 127.0.0.1 only; production needs authentication and an origin allow-list.
-- **Smaller gaps:**
-  - bad input gets a generic HTTP 500;
-  - there's no negation handling;
-  - currency is assumed to be USD;
-  - a resent id overwrites its file;
-  - webhook.site's free URL takes 50 requests, after which the POST fails but the record is still written and returned;
-  - opening the n8n editor first asks you to create an owner account.
+Beyond x08 and the unexplained priority misses above:
+
+- **Both safety nets are the model's own judgment:** self-reported confidence and `actionable` (see x01).
+- **The tests are small and mine,** and the rules were written knowing the samples.
+- **One category per message:** x07's billing question isn't routed.
+- **The webhooks have no authentication and accept any origin:** fine locally, where n8n listens on 127.0.0.1 only; production needs authentication and an origin allow-list.
+- **Smaller gaps:** bad input gets a generic HTTP 500; no negation handling; USD is assumed; a resent id overwrites its file; webhook.site's free URL takes 50 requests, then the POST fails but the record is kept and returned; the n8n editor first asks for an owner account.
 
 ## At production scale
 
-- **Reliability:**
-  - queue messages and answer 202 at once;
-  - run n8n in queue mode on Postgres;
-  - make records idempotent by id;
-  - add a dead-letter queue;
-  - alert on the `llm_error` rate.
-- **Cost:** about $320 per million messages. The system prompt is identical on every call and over 1,024 tokens, so OpenAI's automatic prompt caching cuts the input cost.
-- **Latency:** the model call is nearly all of it, and processing asynchronously hides it from the sender.
+- **Reliability:** queue messages and answer 202 at once; n8n in queue mode on Postgres; records idempotent by id; a dead-letter queue; alerts on the `llm_error` rate.
+- **Cost:** about $320 per million messages. The system prompt is identical on every call and over 1,024 tokens, so OpenAI's automatic prompt caching cuts input cost.
+- **Latency:** nearly all model call, hidden from the sender by asynchronous processing.
 
 ## Phase 2
 
-- A labeled set of a few hundred messages, written by someone else, scored on every prompt change.
-- Confidence from token log-probabilities.
-- A prompt version in each record.
-- Reviewer corrections fed back into the set.
-- Routing for the second topic of a multi-topic message.
+The list in `PROMPTS.md`, plus reviewer corrections fed back into the labeled set and routing for a multi-topic message's second topic.
 
 ## Demo
 
-After setup, two more entry points feed the same Ingestion node; neither holds any logic:
-
-- `http://localhost:5678/webhook/ui`: a one-page demo. Load any of the 15 messages or type one, and it shows the returned record.
-- `http://localhost:5678/form/triage-form`: n8n's form trigger. The confirmation page shows the category, priority, confidence, queue, reasons and summary.
+`http://localhost:5678/webhook/ui` is a one-page demo showing the returned record for any of the 15 messages or a typed one; `http://localhost:5678/form/triage-form` is n8n's form trigger, whose confirmation page shows category, priority, confidence, queue, reasons and summary. Both feed the Ingestion node and hold no logic.
 
 ## Commands
 
-You need Docker, Node 22+, and a `.env` with your key: `cp .env.example .env`, then fill in `OPENAI_API_KEY`.
+You need Docker, Node 22+ and a `.env` (`cp .env.example .env`, then add `OPENAI_API_KEY`).
 
 ```
 ./scripts/setup.sh                              # build, start n8n, import, publish
-node scripts/run-samples.js                     # five samples -> output/records.json
+node scripts/run-samples.js                     # samples -> output/records.json
 node scripts/run-samples.js samples-extra.json  # extras -> output/records-extra.json
 node --test "tests/*.test.js"                   # unit tests; no n8n needed
 node --test "tests/e2e/*.test.js"               # end-to-end; needs both runs
 ```
-
-`PROMPTS.md` explains the prompt, `DECISIONS.md` lists my choices, and `AI-LOG.md` records what the AI assistant and the model got wrong.
