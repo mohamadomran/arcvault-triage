@@ -1,5 +1,6 @@
 // Assembles workflow.json from the plain files. prompts/triage.md, schema.json ($defs.llm and the
-// source enum) and src/routing.js are copied in verbatim, so workflow.json is never edited by hand.
+// source enum), src/routing.js and src/record.js are copied in verbatim, so workflow.json is never
+// edited by hand.
 // Run: node scripts/build-workflow.js
 const fs = require("node:fs");
 const path = require("node:path");
@@ -10,6 +11,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const schema = JSON.parse(read("schema.json"));
 const prompt = read("prompts/triage.md");
 const routing = read("src/routing.js");
+const record = read("src/record.js");
 const samples = [...JSON.parse(read("samples.json")), ...JSON.parse(read("samples-extra.json"))];
 
 // Fixed ids: re-importing replaces the same workflow, and the LLM node finds the imported credential.
@@ -96,49 +98,21 @@ if (uiTemplate.split(samplesTag).length !== 2) throw new Error("ui/index.html mu
 const samplesJson = JSON.stringify(samples.map(({ id, source, message }) => ({ id, source, message }))).replace(/</g, "\\u003c");
 const uiHtml = uiTemplate.replace(samplesTag, `<script type="application/json" id="samples">${samplesJson}</script>`);
 
-// Steps 4 and 6: src/routing.js decides; this code only parses the model's reply and assembles
-// the record in schema order. A failed call, a refusal, a cut-off reply or content that isn't
-// JSON all leave llm null, which route() turns into llm_error and the Escalation queue.
+// Steps 4 and 6: src/routing.js decides and src/record.js assembles the record. This node only
+// passes in the intake, the model's reply (or the HTTP error item) and the clock.
 const routeCode = `${routing}
 // ---- end of src/routing.js ----
 
-const intake = ${ref(N.ingest)}.record;
-const response = $input.first().json;
+${record}
+// ---- end of src/record.js ----
 
-function parseReply(response) {
-  if (response.error !== undefined) {
-    const e = response.error;
-    return { llm: null, error: "OpenAI call failed: " + (typeof e === "string" ? e : e.message ?? JSON.stringify(e)) };
-  }
-  const choice = response.choices?.[0];
-  if (choice?.message?.refusal) return { llm: null, error: "Model refused: " + choice.message.refusal };
-  if (choice?.finish_reason !== "stop") return { llm: null, error: "Model reply cut off: finish_reason " + choice?.finish_reason };
-  try {
-    return { llm: JSON.parse(choice.message.content), error: null };
-  } catch (e) {
-    return { llm: null, error: "Model reply is not JSON: " + e.message };
-  }
-}
-
-const { llm, error } = parseReply(response);
-const { routing, escalation } = route(llm, intake.message);
-const failed = escalation.reasons.includes("llm_error");
-// OpenAI's 401 message quotes part of the key; keep it out of the record.
-const reason = failed ? (error ?? "Model output outside the allowed categories or confidence range") : null;
-
-return [{ json: {
-  ...intake,
-  classification: failed ? null : llm.classification,
-  enrichment: failed ? null : llm.enrichment,
-  routing,
-  summary: failed ? null : llm.summary,
-  escalation,
-  meta: {
-    model: response.model ?? ${JSON.stringify(MODEL)},
-    processed_at: new Date().toISOString(),
-    error: reason && reason.replace(/sk-[\\w*-]+/g, "[redacted key]"),
-  },
-} }];
+return [{ json: buildRecord({
+  intake: ${ref(N.ingest)}.record,
+  response: $input.first().json,
+  route,
+  model: ${JSON.stringify(MODEL)},
+  processedAt: new Date().toISOString(),
+}) }];
 `;
 
 const nodes = [

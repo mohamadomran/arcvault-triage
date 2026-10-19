@@ -11,7 +11,7 @@ A POST to `/webhook/intake` with `id`, `source` and `message` runs these nodes, 
 3. **Steps 4, 6 · Routing and escalation** runs `src/routing.js`. The model never routes.
 4. **Output** writes `output/records/<id>.json`, POSTs the record to webhook.site with `?queue=<destination>`, and returns it.
 
-n8n keeps the workflow, the encrypted credential and its execution history in `./.n8n`. There is no other database. The logic lives in `prompts/triage.md`, `schema.json` and `src/routing.js`, and `scripts/build-workflow.js` generates `workflow.json` from them.
+n8n keeps the workflow, the encrypted credential and its execution history in `./.n8n`. There is no other database. The logic lives in `prompts/triage.md`, `schema.json`, `src/routing.js` and `src/record.js` (record assembly), and `scripts/build-workflow.js` generates `workflow.json` from them.
 
 **Model:** gpt-4o-mini at temperature 0. It supports strict JSON-schema output, costs about $0.0003 per message and answers in 2–4 seconds. On an earlier prompt gpt-4o scored higher, at about 17 times the cost; the final gpt-4o-mini prompt matches that score (see Results).
 
@@ -79,7 +79,6 @@ On the prompt as of change 3, gpt-4o passed 14 of 15 at $0.0054 per message, aga
 - **Priority misses my policy on samples 3 and 4,** and I don't know why.
 - **The tests are small and mine.** The rules were written knowing the samples.
 - **There is one category per message.** x07's billing question isn't routed.
-- **Record assembly isn't unit-tested.** It lives in a Code node template in `build-workflow.js`.
 - **The webhooks have no authentication and accept any origin.** That is fine locally, where n8n listens on 127.0.0.1 only; production needs authentication and an origin allow-list.
 - **Smaller gaps:**
   - bad input gets a generic HTTP 500;
