@@ -80,6 +80,7 @@ On the prompt as of change 3, gpt-4o passed 14 of 15 at $0.0054 per message, aga
 - **The tests are small and mine.** The rules were written knowing the samples.
 - **There is one category per message.** x07's billing question isn't routed.
 - **Record assembly isn't unit-tested.** It lives in a Code node template in `build-workflow.js`.
+- **The webhooks have no authentication and accept any origin.** That is fine locally, where n8n listens on 127.0.0.1 only; production needs authentication and an origin allow-list.
 - **Smaller gaps:**
   - bad input gets a generic HTTP 500;
   - there's no negation handling;

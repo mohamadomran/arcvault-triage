@@ -77,3 +77,7 @@ All runs: the five samples plus the 10 extras in `samples-extra.json`, through t
 ## Form trigger and demo UI
 
 - **The form's completion text ran together.** I joined the completion fields with newlines. n8n writes `formSubmittedText` with textContent into a paragraph that doesn't keep line breaks, so the six fields showed as one run of text. Caught by the screenshot of the first form submission. Fix: the fields are joined with " · "; a second submission showed them separated.
+
+## Network exposure
+
+- **n8n was published on every network interface.** Since Stage 3, `docker-compose.yml` mapped `"5678:5678"`, so n8n answered on the machine's LAN address. With the owner account unclaimed and the host firewall off, anyone on the network could have claimed the owner account and used the stored OpenAI credential. Caught in review, not by me. Fix: the port is bound to `127.0.0.1:5678:5678`. After a restart the LAN address refuses the connection (curl exit 7) and localhost answers 200.

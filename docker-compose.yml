@@ -3,7 +3,9 @@ services:
     # Pinned: the "stable" tag moves, and the workflow and CLI commands were checked against this version.
     image: n8nio/n8n:2.43.7
     ports:
-      - "5678:5678"
+      # Localhost only: on all interfaces, anyone on the network could claim the unclaimed owner
+      # account and use the stored OpenAI credential.
+      - "127.0.0.1:5678:5678"
     environment:
       # Read/Write Files nodes may only touch /files (n8n 2.x restricts file access by default).
       N8N_RESTRICT_FILE_ACCESS_TO: /files
