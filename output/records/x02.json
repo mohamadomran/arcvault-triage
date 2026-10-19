@@ -1,7 +1,7 @@
 {
   "id": "x02",
   "source": "Support Portal",
-  "received_at": "2026-10-16T13:24:10.201Z",
+  "received_at": "2026-10-19T06:20:20.671Z",
   "message": "We were billed $2,450 on invoice INV-3307, but our agreement says $1,800 per month. Please correct it before our finance team closes the quarter.",
   "classification": {
     "rationale": "The message discusses a billing discrepancy and requests a correction based on the agreement.",
@@ -45,7 +45,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T13:24:12.468Z",
+    "processed_at": "2026-10-19T06:20:22.542Z",
     "error": null
   }
 }

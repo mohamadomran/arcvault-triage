@@ -1,7 +1,7 @@
 {
   "id": "x07",
   "source": "Support Portal",
-  "received_at": "2026-10-16T13:24:21.978Z",
+  "received_at": "2026-10-19T06:20:30.503Z",
   "message": "The PDF download link on the invoices page opens a blank tab. Also, while you're looking, can you confirm whether we're still on the annual plan?",
   "classification": {
     "rationale": "The message describes a broken feature (PDF download link) and includes a question about the account plan.",
@@ -36,7 +36,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T13:24:23.927Z",
+    "processed_at": "2026-10-19T06:20:32.395Z",
     "error": null
   }
 }

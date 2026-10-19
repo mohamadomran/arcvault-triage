@@ -86,3 +86,7 @@ All runs: the five samples plus the 10 extras in `samples-extra.json`, through t
 
 - **Model output: x01 flipped between runs.** In a fresh clone with the same prompt, the same model snapshot and temperature 0, x01 ("it's not working again") came back `actionable: true`, Bug Report, High, confidence 0.85, so it went to Engineering instead of Escalation. The committed record has `actionable: false`. Caught by the end-to-end test in the clone: 11 of 15 instead of 12. Not fixed here; the consistency runs measure how often this happens.
 - **setup.sh without a .env failed late and messily.** It printed a Node ENOENT stack trace, created a webhook.site URL, wrote a `.env` holding only that URL, and only then stopped on the missing key. Caught while checking the fresh-clone path. Fix: setup.sh checks for the key first and says `cp .env.example .env`; `.env.example` is new.
+
+## Consistency runs
+
+- **Model output: three of 15 messages changed between identical runs.** Three runs of all 15 messages, temperature 0, same model snapshot (`gpt-4o-mini-2024-07-18`). x01 was `actionable: true`, Bug Report, Engineering in runs 1 and 2 and `actionable: false`, Escalation in run 3. x08 was a Bug Report for Engineering in runs 1 and 2 and Incident/Outage for Escalation in run 3. x06's priority was Low, Medium, Medium. Every run scored 12 of 15 on the end-to-end test, with x01 failing in runs 1 and 2 and x08 in run 3. Caught by comparing the three runs field by field. Not fixed: the write-up now says the Final column is one draw, and the third run is the committed one.

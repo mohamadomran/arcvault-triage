@@ -1,10 +1,10 @@
 {
   "id": "x04",
   "source": "Email",
-  "received_at": "2026-10-16T13:24:15.269Z",
+  "received_at": "2026-10-19T06:20:24.886Z",
   "message": "Nothing loads for anyone at our company. The whole app is down since 8am and we have a client demo at noon.",
   "classification": {
-    "rationale": "The message states that the whole app is down for the customer's company, affecting multiple users.",
+    "rationale": "The message states that the whole app is down for the company, affecting multiple users.",
     "category": "Incident/Outage",
     "priority": "High",
     "confidence": 0.95
@@ -44,7 +44,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T13:24:17.657Z",
+    "processed_at": "2026-10-19T06:20:26.781Z",
     "error": null
   }
 }

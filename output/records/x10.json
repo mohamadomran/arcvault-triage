@@ -1,16 +1,16 @@
 {
   "id": "x10",
   "source": "Web Form",
-  "received_at": "2026-10-16T13:24:28.572Z",
+  "received_at": "2026-10-19T06:20:36.842Z",
   "message": "Do you know any good pizza places near your office? We're visiting the city next week.",
   "classification": {
-    "rationale": "The message is a request for recommendations and does not pertain to a support issue.",
+    "rationale": "The message is a general inquiry about pizza places and does not relate to a support issue.",
     "category": "Technical Question",
     "priority": "Low",
-    "confidence": 0.95
+    "confidence": 0.85
   },
   "enrichment": {
-    "core_issue": "The customer is asking for recommendations for pizza places near the office.",
+    "core_issue": "The customer is asking for pizza place recommendations near the office.",
     "identifiers": [],
     "billing": {
       "invoiced_amount": null,
@@ -28,7 +28,7 @@
     "standard_queue": "IT/Security",
     "destination_queue": "Escalation"
   },
-  "summary": "The customer is inquiring about good pizza places near the office as they will be visiting the city next week. This is a general question and does not require action.",
+  "summary": "The customer is inquiring about good pizza places near the office as they will be visiting the city next week. This is a general question and does not relate to any support issue.",
   "escalation": {
     "flagged": true,
     "reasons": [
@@ -38,7 +38,7 @@
   },
   "meta": {
     "model": "gpt-4o-mini-2024-07-18",
-    "processed_at": "2026-10-16T13:24:30.626Z",
+    "processed_at": "2026-10-19T06:20:38.400Z",
     "error": null
   }
 }
