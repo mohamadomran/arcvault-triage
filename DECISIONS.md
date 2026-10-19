@@ -51,7 +51,7 @@ Decisions I have approved, and why. Newest at the bottom.
 - **The webhook checks its input.** `id` must be an integer, or a string of letters, digits, `_` or `-`, because it becomes a file name. `source` must be one of the schema's three channels, and `message` a non-empty string.
 - **Samples run one at a time.** `scripts/run-samples.js` POSTs them in order and writes `output/records.json`, every record from that run sorted by id, as the single structured output file the spec asks for.
 - **The end-to-end test runs separately from the unit tests.** `tests/e2e/pipeline.test.js` needs n8n running and a sample run, so it sits outside the unit test glob. It checks only the fields I set expectations for. I left out schema validation and a `package.json`, to keep the repo free of dependencies.
-- **One prompt rule added after the sample run.** Sample 1 came back as Incident/Outage, so I added "Classify by the scope the message states, not by the type of error." to the Bug Report vs Incident/Outage tie-breaker and reran the samples once. It didn't change sample 1. Every other miss stays as it is and is described in `WRITEUP.md`, so the records show what the prompt actually does.
+- **One prompt rule added after the sample run.** Sample 1 came back as Incident/Outage, so I added "Classify by the scope the message states, not by the type of error." to the Bug Report vs Incident/Outage tie-breaker and reran the samples once. It didn't change sample 1. Every other miss stays as it is and is described in `RESULTS.md`, so the records show what the prompt actually does.
 
 ## Extra test set and fixes
 
