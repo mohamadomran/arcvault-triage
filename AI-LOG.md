@@ -81,3 +81,8 @@ All runs: the five samples plus the 10 extras in `samples-extra.json`, through t
 ## Network exposure
 
 - **n8n was published on every network interface.** Since Stage 3, `docker-compose.yml` mapped `"5678:5678"`, so n8n answered on the machine's LAN address. With the owner account unclaimed and the host firewall off, anyone on the network could have claimed the owner account and used the stored OpenAI credential. Caught in review, not by me. Fix: the port is bound to `127.0.0.1:5678:5678`. After a restart the LAN address refuses the connection (curl exit 7) and localhost answers 200.
+
+## Fresh clone
+
+- **Model output: x01 flipped between runs.** In a fresh clone with the same prompt, the same model snapshot and temperature 0, x01 ("it's not working again") came back `actionable: true`, Bug Report, High, confidence 0.85, so it went to Engineering instead of Escalation. The committed record has `actionable: false`. Caught by the end-to-end test in the clone: 11 of 15 instead of 12. Not fixed here; the consistency runs measure how often this happens.
+- **setup.sh without a .env failed late and messily.** It printed a Node ENOENT stack trace, created a webhook.site URL, wrote a `.env` holding only that URL, and only then stopped on the missing key. Caught while checking the fresh-clone path. Fix: setup.sh checks for the key first and says `cp .env.example .env`; `.env.example` is new.

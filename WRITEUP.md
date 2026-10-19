@@ -116,7 +116,7 @@ After setup, two more entry points feed the same Ingestion node; neither holds a
 
 ## Commands
 
-You need Docker, Node 22+, and a `.env` with `OPENAI_API_KEY=...`.
+You need Docker, Node 22+, and a `.env` with your key: `cp .env.example .env`, then fill in `OPENAI_API_KEY`.
 
 ```
 ./scripts/setup.sh                              # build, start n8n, import, publish

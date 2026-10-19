@@ -7,6 +7,12 @@ cd "$(dirname "$0")/.."
 WORKFLOW_ID=arcvaultTriage01
 N8N="docker compose exec -T n8n n8n"
 
+# Check the key first, so a missing .env stops here and not after the webhook.site call below.
+if [ ! -f .env ] || ! node -e 'process.loadEnvFile(".env"); process.exit(process.env.OPENAI_API_KEY ? 0 : 1)'; then
+  echo "Set OPENAI_API_KEY in .env first: cp .env.example .env, then add your key." >&2
+  exit 1
+fi
+
 # The credential file holds the API key: delete it however this script ends.
 trap 'rm -f build/credentials.json' EXIT
 
